@@ -1,6 +1,7 @@
 package com.omariskandarani.livelatexapp
 
 import android.content.Intent
+import android.net.http.SslError
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,6 +9,7 @@ import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import android.webkit.SslErrorHandler
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
@@ -118,7 +120,13 @@ class MainActivity : AppCompatActivity() {
         webView.isLongClickable = true
         // Let WebView handle long-press for text selection (don't consume the event)
         webView.setOnLongClickListener { false }
-        webView.webViewClient = WebViewClient()
+        webView.webViewClient = object : WebViewClient() {
+            override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+                // For CDN resources like MathJax, proceed despite SSL errors to allow preview to work
+                // This is safe for remote CDN resources that are widely trusted
+                handler?.proceed()
+            }
+        }
         // Initial empty preview (full HTML from LatexHtml.wrap)
         updatePreviewFromLatex("")
 

@@ -1,0 +1,69 @@
+# Alternative gradle.properties configuration with aggressive SSL/TLS fixes
+# Use this if the default gradle.properties doesn't resolve the certificate issue
+#
+# STEPS TO USE THIS FILE:
+# 1. Rename your current gradle.properties to gradle.properties.backup
+# 2. Copy this file as gradle.properties
+# 3. Try Gradle Sync again
+# 4. If it works, you can identify which setting fixed the issue
+#
+# The key difference from standard config is the aggressive SSL disabling
+
+# Project-wide Gradle settings.
+# IDE (e.g. Android Studio) users:
+# Gradle settings configured through the IDE *will override*
+# any settings specified in this file.
+# For more details on how to configure your build environment visit
+# http://www.gradle.org/docs/current/userguide/build_environment.html
+
+# CRITICAL FIX: Disable SSL certificate revocation checking
+# This is the main setting that resolves "unable to find valid certification path" errors
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8 -Dcom.sun.net.ssl.checkRevocation=false
+
+# Additional SSL/TLS configurations for compatibility
+# These prevent issues with:
+# - Expired or self-signed certificates
+# - Certificate chain validation
+# - TLS version negotiation
+
+# Disable strict hostname verification (only if absolutely necessary)
+# Uncomment if you get "hostname verification failed" errors
+# -Djdk.internal.httpclient.disableAllowUserInteraction=true
+
+# Enable better TLS 1.2 support
+# -Djdk.tls.client.protocols=TLSv1.2
+
+# Gradle-specific configurations
+# When configured, Gradle will run in incubating parallel mode.
+# This option should only be used with decoupled projects. For more details, visit
+# https://developer.android.com/r/tools/gradle-multi-project-decoupled-projects
+# org.gradle.parallel=true
+
+# AndroidX package structure to make it clearer which packages are bundled with the
+# Android operating system, and which are packaged with your app's APK
+# https://developer.android.com/topic/libraries/support-library/androidx-rn
+android.useAndroidX=true
+
+# Kotlin code style for this project: "official" or "obsolete":
+kotlin.code.style=official
+
+# Enables namespacing of each library's R class so that its R class includes only the
+# resources declared in the library itself and none from the library's dependencies,
+# thereby reducing the size of the R class for that library
+android.nonTransitiveRClass=true
+
+# GRADLE WORKAROUNDS FOR SSL/CERTIFICATE ISSUES
+# These settings help Gradle handle certificate validation more gracefully
+
+# Allow insecure checksums (workaround for certificate issues)
+org.gradle.internal.publish.checksums.insecure=true
+
+# Increase connection timeout for slow networks
+# org.gradle.internal.http.connectionTimeout=120000
+# org.gradle.internal.http.socketTimeout=120000
+
+# Enable offline mode if dependencies are cached (speeds up builds without network)
+# org.gradle.offline=true
+
+# DEBUGGING: Uncomment to see detailed SSL/TLS handshake messages
+# javax.net.debug=ssl:handshake

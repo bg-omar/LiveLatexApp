@@ -15,7 +15,7 @@ import kotlin.text.replace
 import kotlin.text.lines
 
 /**
- * Minimal LaTeX â†’ HTML previewer for prose + MathJax math.
+ * Minimal LaTeX → HTML previewer for prose + MathJax math.
  * - Parses user \newcommand / \def into MathJax macros
  * - Converts common prose constructs (sections, lists, tables, theorems, etc.)
  * - Leaves math regions intact ($...$, \[...\], \(...\), equation/align/...)
@@ -27,7 +27,7 @@ object LatexHtml {
     private var lineMapOrigToMergedJson: String? = null
     private var lineMapMergedToOrigJson: String? = null
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ PUBLIC ENTRY â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ─────────────────────────── PUBLIC ENTRY ───────────────────────────
     private const val BEGIN_DOCUMENT = "\\begin{document}"
     private const val END_DOCUMENT = "\\end{document}"
 
@@ -77,15 +77,15 @@ object LatexHtml {
     }
 
 
-    // â”€â”€ Shared tiny helpers (define ONCE) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Shared tiny helpers (define ONCE) ─────────────────────────────────────────
     private fun isEscaped(s: String, i: Int): Boolean {
         var k = i - 1
         var bs = 0
         while (k >= 0 && s[k] == '\\') { bs++; k-- }
-        return (bs and 1) == 1   // odd number of backslashes â†’ escaped
+        return (bs and 1) == 1   // odd number of backslashes → escaped
     }
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ PAGE BUILDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ─────────────────────────── PAGE BUILDER ───────────────────────────
 
     private fun buildHtml(fullTextHtml: String, macrosJs: String): String = """
 <!DOCTYPE html>
@@ -371,7 +371,7 @@ object LatexHtml {
           if (typeof window.__collectMarks === 'function') window.__collectMarks();
         }
         const allMarks  = window.__llMarks || [];
-        const realMarks = allMarks.filter(m => !m.synthetic); // <â€” ignore synthetic here
+        const realMarks = allMarks.filter(m => !m.synthetic); // <— ignore synthetic here
 
         if (realMarks.length) {
           // === mark-based scroll (unchanged, but use realMarks) ===
@@ -541,7 +541,7 @@ object LatexHtml {
         m.className = 'llmark llmark--synthetic';
         m.dataset.id = 'doc-start';
         m.dataset.abs = firstSyncline.dataset.abs || '1';
-        m.dataset.synthetic = '1';                // <â€” add this
+        m.dataset.synthetic = '1';                // <— add this
         firstSyncline.parentNode.insertBefore(m, firstSyncline);
         if (typeof window.__collectMarks === 'function') window.__collectMarks();
       }
@@ -644,7 +644,7 @@ object LatexHtml {
         const id = el.dataset.id || '';
         if (!id) continue;
         if (e.isIntersecting) {
-          // ratio is how much of the mark's (tiny) box sits in the band â€” we boost with order so later ties win
+          // ratio is how much of the mark's (tiny) box sits in the band — we boost with order so later ties win
           if (!visible.has(id)) visible.set(id, { id, ratio: e.intersectionRatio || 0, order: marks.findIndex(x => x.id === id) });
           const v = visible.get(id);
           v.ratio = e.intersectionRatio || 0;
@@ -660,7 +660,7 @@ object LatexHtml {
       threshold: [0, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1]
     });
 
-    // Observe all mark sentinels (theyâ€™re zero-size; thatâ€™s fine â€” CHTML boxes exist)
+    // Observe all mark sentinels (they’re zero-size; that’s fine — CHTML boxes exist)
     const marks = ensureMarks();
     marks.forEach(m => io.observe(m.el));
   }
@@ -685,13 +685,13 @@ object LatexHtml {
 <script>
 (function(){
   function labelFromMark(m){
-    // Prefer the following headingâ€™s text as label; fallback to id
+    // Prefer the following heading’s text as label; fallback to id
     const next = m.el.nextElementSibling;
     let label = (next && /^h[2-5]$/i.test(next.tagName) ? (next.textContent||'').trim() : m.id) || m.id;
     // Indent by level inferred from id prefix
     const lvl = m.id.startsWith('subsubsection-') ? 3 : m.id.startsWith('subsection-') ? 2 : m.id.startsWith('section-') ? 1 : 0;
-    if (lvl === 2) label = '  â€¢ ' + label;
-    if (lvl === 3) label = '    â–¹ ' + label;
+    if (lvl === 2) label = '  • ' + label;
+    if (lvl === 3) label = '    ▹ ' + label;
     return { label, lvl };
   }
 
@@ -807,7 +807,7 @@ object LatexHtml {
     if (!key) return;
     const holder = btn.closest('.tikz-lazy');
     btn.disabled = true;
-    setStatus(holder, 'Renderingâ€¦');
+    setStatus(holder, 'Rendering…');
 
     try {
       // Ask the host (your Kotlin side) to render this key.
@@ -817,7 +817,7 @@ object LatexHtml {
     } catch(_) {}
   }, true);
 
-  // Host â†’ page: receive render result
+  // Host → page: receive render result
   window.addEventListener('message', function(ev){
     const d = ev.data || {};
     if (d && d.type === 'tikz-render-result' && d.key) {
@@ -861,7 +861,7 @@ object LatexHtml {
         e.preventDefault();
         const key = btn.dataset.tikzKey;
         const wrap = btn.closest('.tikz-lazy');
-        setStatus(wrap, 'Renderingâ€¦');
+        setStatus(wrap, 'Rendering…');
 
         // Start render
         callHostAsync(key);
@@ -904,7 +904,7 @@ object LatexHtml {
 """.trimIndent()
 
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ PIPELINE HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ──────────────────────── PIPELINE HELPERS ────────────────────────
 
     private fun applyProseConversions(s: String, meta: TitleMeta, absOffset: Int,
                                       fullSourceNoComments: String, tikzPreamble: String): String {
@@ -918,8 +918,8 @@ object LatexHtml {
         t = convertIncludeGraphics(t)
         t = convertMulticols(t)
 
-        t = convertLongtablesToTables(t)                 // longtable â†’ table/tabular
-        t = convertTcolorboxes(t)                        // â† NEW: render tcolorbox
+        t = convertLongtablesToTables(t)                 // longtable → table/tabular
+        t = convertTcolorboxes(t)                        // ← NEW: render tcolorbox
         // TikZ temporarily disabled for Android preview
         // t = TikzRenderer.convertTikzPictures(t, fullSourceNoComments, tikzPreamble)
 
@@ -959,8 +959,8 @@ object LatexHtml {
             var bs = 0
             var k = j - 1
             while (k >= 0 && line[k] == '\\') { bs++; k-- }
-            if (bs % 2 == 0) return j  // even backslashes â†’ % is not escaped
-            i = j + 1                   // odd backslashes â†’ escaped, keep searching
+            if (bs % 2 == 0) return j  // even backslashes → % is not escaped
+            i = j + 1                   // odd backslashes → escaped, keep searching
         }
     }
 
@@ -1018,7 +1018,7 @@ object LatexHtml {
                 t = t.replace("\\&","&amp;")
             }
 
-            // â”€â”€ NEW: \verb and \verb*  (any delimiter) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── NEW: \verb and \verb*  (any delimiter) ───────────────────
             t = Regex("""\\verb\*?(.)(.+?)\1""", RegexOption.DOT_MATCHES_ALL)
                 .replace(t) { m ->
                     val code = htmlEscapeAll(m.groupValues[2])
@@ -1026,7 +1026,7 @@ object LatexHtml {
                 }
             // replace commands -> placeholders (so escaping won't hit them)
             fun wrap(tag: String, inner: String) = "\u0001$tag\u0002$inner\u0001/$tag\u0002"
-            // â”€â”€ NEW: paragraph breaks / noindent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── NEW: paragraph breaks / noindent ─────────────────────────
             t = t.replace(Regex("""\\noindent\b"""), "")
             t = t.replace(Regex("""\\smallbreak\b"""), """<div style="height:.5em"></div>""")
                 .replace(Regex("""\\medbreak\b"""),   """<div style="height:1em"></div>""")
@@ -1045,13 +1045,13 @@ object LatexHtml {
             t = replaceCmd1ArgBalanced(t, "uline")     { "<u>${rec(it)}</u>" }
             t = replaceCmd1ArgBalanced(t, "footnotesize"){ "<small>${rec(it)}</small>" }
 
-            // â”€â”€ NEW: boxes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── NEW: boxes ───────────────────────────────────────────────
             t = replaceCmd1ArgBalanced(t, "mbox") { """<span style="white-space:nowrap;">${rec(it)}</span>""" }
             t = replaceCmd1ArgBalanced(t, "fbox") {
                 """<span style="display:inline-block;border:1px solid var(--fg);padding:0 .25em;">${rec(it)}</span>"""
             }
 
-            // â”€â”€ NEW: textual symbol macros â†’ Unicode â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── NEW: textual symbol macros → Unicode ─────────────────────
             t = replaceTextSymbols(t)
 
 
@@ -1075,13 +1075,13 @@ object LatexHtml {
                 val chunk = chunkRaw.trim()
                 if (chunk.isNotEmpty()) {
                     if (Regex("""\n{2,}""").containsMatchIn(chunk)) {
-                        // Real paragraph breaks â†’ wrap each paragraph
+                        // Real paragraph breaks → wrap each paragraph
                         val paras = chunk.split(Regex("""\n{2,}"""))
                             .map { it.trim() }.filter { it.isNotEmpty() }
                             .joinToString("") { p -> "<p>${latexProseToHtmlWithMath(p)}</p>" }
                         out.append(paras)
                     } else {
-                        // Inline-only text â†’ DO NOT wrap in <p>
+                        // Inline-only text → DO NOT wrap in <p>
                         out.append(latexProseToHtmlWithMath(chunk))
                     }
                 }
@@ -1101,7 +1101,7 @@ object LatexHtml {
 
 
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ MACROS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ───────────────────────────── MACROS ─────────────────────────────
 
     private data class Macro(val def: String, val nargs: Int)
 
@@ -1213,7 +1213,7 @@ object LatexHtml {
             .replace("\r", "") + "\""
 
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ PROSE CONVERSIONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ──────────────────────── PROSE CONVERSIONS ────────────────────────
 
     private fun convertSections(s: String, absOffset: Int): String {
         fun inject(kind: String, tag: String, input: String): String {
@@ -1325,7 +1325,7 @@ object LatexHtml {
             while (i >= 0) {
                 for (cmd in arrayOf("textbf","emph","textit","itshape","underline","uline","small","footnotesize")) {
                     val rep = tryWrap(cmd, i)
-                    if (rep != null) return rep // whole string rebuilt; weâ€™re done
+                    if (rep != null) return rep // whole string rebuilt; we’re done
                 }
                 i = s.indexOf('\\', i + 1)
             }
@@ -1375,7 +1375,7 @@ object LatexHtml {
                 val end = if (closeIdx >= 0) closeIdx + 2 else n
                 sb.append(s.substring(next, end)); i = end; continue
             }
-            // \begin{env} â€¦ \end{env}
+            // \begin{env} … \end{env}
             if (next == nextBegin) {
                 val nameOpen = next + "\\begin{".length
                 val nameClose = s.indexOf('}', nameOpen)
@@ -1385,7 +1385,7 @@ object LatexHtml {
                     val endAt = s.indexOf(endTok, nameClose + 1).let { if (it < 0) n else it + endTok.length }
                     sb.append(s.substring(next, endAt)); i = endAt; continue
                 }
-                // not a math env â†’ treat as prose
+                // not a math env → treat as prose
                 sb.append("\\begin{"); i = nameOpen
             }
         }
@@ -1442,7 +1442,7 @@ object LatexHtml {
                 val rawLabel   = m.groupValues[1] // may be empty
                 val rawContent = m.groupValues[2]
 
-                // Peel a single top-level \textbf{...}/\emph{...}/\textit{...} so math inside doesnâ€™t break it
+                // Peel a single top-level \textbf{...}/\emph{...}/\textit{...} so math inside doesn’t break it
                 val (peeled, tag) = peelTopLevelTextWrapper(rawLabel)
                 val labelHtmlInner = latexProseToHtmlWithMath(peeled)
                 val labelHtml = when (tag) {
@@ -1480,7 +1480,7 @@ object LatexHtml {
             val open = m.range.last
             val close = findBalancedBrace(raw, open)
             if (close < 0) return null
-            // Ensure thereâ€™s nothing but optional whitespace after the brace
+            // Ensure there’s nothing but optional whitespace after the brace
             val tail = raw.substring(close + 1).trim()
             if (tail.isNotEmpty()) return null
             val inner = raw.substring(open + 1, close)
@@ -1538,7 +1538,7 @@ object LatexHtml {
 
             val key = s.substring(i, eq).trim()
             var j = eq + 1
-            // value may be {â€¦} or bare up to next top-level comma
+            // value may be {…} or bare up to next top-level comma
             skipWs()
 
             val value: String
@@ -1644,7 +1644,7 @@ object LatexHtml {
     // --- Tables ---------------------------------------------------------------
 
     private fun convertTabulars(text: String): String {
-        // We canâ€™t rely on a single regex because colspec may nest (p{...}).
+        // We can’t rely on a single regex because colspec may nest (p{...}).
         val out = StringBuilder(text.length + 512)
         var i = 0
         while (true) {
@@ -1679,7 +1679,7 @@ object LatexHtml {
                 .trim()
 
             // Heal early HTML breaks (defensive): turn accidental <br> back into LaTeX \\
-            // so the row-splitter works and we donâ€™t render spurious line breaks in cells.
+            // so the row-splitter works and we don’t render spurious line breaks in cells.
             body = body.replace(Regex("""(?i)<br\s*/?>"""), "\\\\")
             // Split rows on unescaped \\  (allow trailing spaces)
             val rows = Regex("""(?<!\\)\\\\\s*""").split(body)
@@ -1779,7 +1779,7 @@ object LatexHtml {
         )
         return t
     }
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ SANITIZER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ─────────────────────────── SANITIZER ───────────────────────────
 
     /** Convert abstract/center/theorem-like to HTML; drop unknown NON-math envs; keep math envs intact. */
     private fun sanitizeForMathJaxProse(bodyText: String): String {
@@ -1789,7 +1789,7 @@ object LatexHtml {
         s = s.replace("""\\titlepageOpen""".toRegex(), "")
             .replace("""\\titlepageClose""".toRegex(), "")
 
-        // center â†’ HTML
+        // center → HTML
         // center
         s = s.replace(
             Regex("""\\begin\{center\}(.+?)\\end\{center\}""", RegexOption.DOT_MATCHES_ALL)
@@ -1848,7 +1848,7 @@ object LatexHtml {
             "(?:$mathEnvs|tabular|table|longtable|figure|center|tikzpicture|tcolorbox|thebibliography|itemize|enumerate|description|multicols)"
 
 
-// NOTE: \w is a regex class â€” in a raw string use \w (not \\w)
+// NOTE: \w is a regex class — in a raw string use \w (not \\w)
         s = s.replace(Regex("""\\begin\{(?!$keepEnvs)\w+\}"""), "")
         s = s.replace(Regex("""\\end\{(?!$keepEnvs)\w+\}"""), "")
 
@@ -1856,11 +1856,11 @@ object LatexHtml {
     }
 
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ SIUNITX SHIMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ───────────────────────── SIUNITX SHIMS ─────────────────────────
 
     private fun convertSiunitx(s: String): String {
         var t = s
-        // \num{1.23e-4} â†’ 1.23\times 10^{-4}
+        // \num{1.23e-4} → 1.23\times 10^{-4}
         t = t.replace(Regex("""\\num\{([^\u007D]*)\}""")) { m ->
             val raw = m.groupValues[1].trim()
             val sci = Regex("""^\s*([+-]?\d+(?:\.\d+)?)[eE]([+-]?\d+)\s*$""").matchEntire(raw)
@@ -1870,12 +1870,12 @@ object LatexHtml {
                 "$a\\times 10^{${b}}"
             } else raw
         }
-        // \si{m.s^{-1}} â†’ \mathrm{m\,s^{-1}}
+        // \si{m.s^{-1}} → \mathrm{m\,s^{-1}}
         t = t.replace(Regex("""\\si\{([^\u007D]*)\}""")) { m ->
             val u = m.groupValues[1].replace(".", "\\,").replace("~", "\\,")
             "\\mathrm{$u}"
         }
-        // \SI{<num>}{<unit>} â†’ \num{...}\,\si{...}
+        // \SI{<num>}{<unit>} → \num{...}\,\si{...}
         t = t.replace(Regex("""\\SI\{([^\u007D]*)\}\{([^\u007D]*)\}""")) { m ->
             val num  = m.groupValues[1]
             val unit = m.groupValues[2]
@@ -1895,8 +1895,8 @@ object LatexHtml {
         ).replace(html) { it.value + " " }
 
 
-    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ UTIL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// â”€â”€ Title meta â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ───────────────────────────── UTIL ─────────────────────────────
+// ── Title meta ────────────────────────────────────────────────────────────────
     private data class TitleMeta(
         val title: String?,
         val authors: String?,        // raw \author{...} content
@@ -1928,7 +1928,7 @@ object LatexHtml {
         if (dateRaw == null) return null // like LaTeX default "today" can be debated; keep null to omit if unspecified
         val today = LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy"))
         val trimmed = dateRaw.trim()
-        if (trimmed.isEmpty()) return ""               // \date{} â†’ empty
+        if (trimmed.isEmpty()) return ""               // \date{} → empty
         val replaced = trimmed.replace("""\today""", today)
         return latexProseToHtmlWithMath(replaced)
     }
@@ -1964,7 +1964,7 @@ object LatexHtml {
                 val withMarks = processThanksWithin(p, notes)
                 """<span class="author">${latexProseToHtmlWithMath(withMarks)}</span>"""
             }
-            parts.joinToString("""<span class="author-sep" style="padding:0 .6em;opacity:.5;">Â·</span>""")
+            parts.joinToString("""<span class="author-sep" style="padding:0 .6em;opacity:.5;">·</span>""")
         } ?: ""
 
         // Date
@@ -2031,29 +2031,29 @@ object LatexHtml {
     private fun replaceTextSymbols(t0: String): String {
         var t = t0
         // Punctuation & quotes
-        t = t.replace(Regex("""\\textellipsis\b"""),     "â€¦")
-            .replace(Regex("""\\textquotedblleft\b"""), "â€œ")
-            .replace(Regex("""\\textquotedblright\b"""),"â€")
-            .replace(Regex("""\\textquoteleft\b"""),    "â€˜")
-            .replace(Regex("""\\textquoteright\b"""),   "â€™")
-            .replace(Regex("""\\textemdash\b"""),       "â€”")
-            .replace(Regex("""\\textendash\b"""),       "â€“")
+        t = t.replace(Regex("""\\textellipsis\b"""),     "…")
+            .replace(Regex("""\\textquotedblleft\b"""), "\u201C")
+            .replace(Regex("""\\textquotedblright\b"""), "\u201D")
+            .replace(Regex("""\\textquoteleft\b"""),    "'")
+            .replace(Regex("""\\textquoteright\b"""),   "'")
+            .replace(Regex("""\\textemdash\b"""),       "—")
+            .replace(Regex("""\\textendash\b"""),       "–")
         // Symbols
-        t = t.replace(Regex("""\\textfractionsolidus\b"""), "â„")
-            .replace(Regex("""\\textdiv\b"""),              "Ã·")
-            .replace(Regex("""\\texttimes\b"""),            "Ã—")
-            .replace(Regex("""\\textminus\b"""),            "âˆ’")
-            .replace(Regex("""\\textpm\b"""),               "Â±")
-            .replace(Regex("""\\textsurd\b"""),             "âˆš")
-            .replace(Regex("""\\textlnot\b"""),             "Â¬")
-            .replace(Regex("""\\textasteriskcentered\b"""), "âˆ—")
-            .replace(Regex("""\\textbullet\b"""),           "â€¢")
-            .replace(Regex("""\\textperiodcentered\b"""),   "Â·")
-            .replace(Regex("""\\textdaggerdbl\b"""),        "â€¡")
-            .replace(Regex("""\\textdagger\b"""),           "â€ ")
-            .replace(Regex("""\\textsection\b"""),          "Â§")
-            .replace(Regex("""\\textparagraph\b"""),        "Â¶")
-            .replace(Regex("""\\textbardbl\b"""),           "â€–")
+        t = t.replace(Regex("""\\textfractionsolidus\b"""), "⁄")
+            .replace(Regex("""\\textdiv\b"""),              "÷")
+            .replace(Regex("""\\texttimes\b"""),            "×")
+            .replace(Regex("""\\textminus\b"""),            "−")
+            .replace(Regex("""\\textpm\b"""),               "±")
+            .replace(Regex("""\\textsurd\b"""),             "√")
+            .replace(Regex("""\\textlnot\b"""),             "¬")
+            .replace(Regex("""\\textasteriskcentered\b"""), "∗")
+            .replace(Regex("""\\textbullet\b"""),           "•")
+            .replace(Regex("""\\textperiodcentered\b"""),   "·")
+            .replace(Regex("""\\textdaggerdbl\b"""),        "‡")
+            .replace(Regex("""\\textdagger\b"""),           "†")
+            .replace(Regex("""\\textsection\b"""),          "§")
+            .replace(Regex("""\\textparagraph\b"""),        "¶")
+            .replace(Regex("""\\textbardbl\b"""),           "‖")
             .replace(Regex("""\\textbackslash\b"""),        "&#92;")
         return t
     }
@@ -2098,7 +2098,7 @@ object LatexHtml {
             idx + tok.length <= s.length && s.regionMatches(idx, tok, 0, tok.length)
 
         fun readHtmlTagName(from: Int): Pair<String, Int> {
-            // from is at '<' or '</' â€” return (name, endIndexExclusiveOfName)
+            // from is at '<' or '</' — return (name, endIndexExclusiveOfName)
             var i = from
             if (i < s.length && s[i] == '<') i++
             if (i < s.length && s[i] == '/') i++
@@ -2350,7 +2350,7 @@ object LatexHtml {
                 .replace(Regex("""\\label\{[^\u007D]*\}"""), "")
                 .trim()
 
-            // Whatever remains â†’ let later passes handle (e.g., tabularâ†’table)
+            // Whatever remains → let later passes handle (e.g., tabular→table)
             val hasSubEnv = Regex("""\\begin\{""").containsMatchIn(body)
             val rest = if (body.isNotEmpty()) {
                 if (hasSubEnv) "<div>$body</div>" else "<div>${latexProseToHtmlWithMath(body)}</div>"
@@ -2434,7 +2434,7 @@ object LatexHtml {
         return "max-width:100%;height:auto;"
     }
 
-    // â€”â€” Config / cache â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+    // —— Config / cache ————————————————————————————————————————————————
     private fun sha256Hex(s: String): String {
         val md = java.security.MessageDigest.getInstance("SHA-256")
         val bytes = md.digest(s.toByteArray(Charsets.UTF_8))
@@ -2546,7 +2546,7 @@ $body
         tex.writeText(texDoc)
 
         // Ensure local TikZ libs are discoverable (same env var trick you already use)
-        // (Your run(...) adds TEXINPUTS from currentBaseDir â€” great.)
+        // (Your run(...) adds TEXINPUTS from currentBaseDir — great.)
 
         val (ok1, log1) = run(
             listOf("pdflatex","-interaction=nonstopmode","-halt-on-error","fig.tex"),
@@ -2613,7 +2613,7 @@ $body
         val baseDir = File(mainFilePath).parent ?: ""
         currentBaseDir = baseDir
 
-        // Build marked source to compute origâ†’merged line mapping across \input/\include expansions
+        // Build marked source to compute orig→merged line mapping across \input/\include expansions
         val markerPrefix = "%%LLM"
         val origLines = texSource.split('\n')
         val marked = buildString(texSource.length + origLines.size * 10) {
