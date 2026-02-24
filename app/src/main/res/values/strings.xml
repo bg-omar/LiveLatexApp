@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">LiveLatexApp</string>
+    <string name="compiling_and_downloading">Compiling &amp; Downloading Packages...</string>
+    <string name="export_to_pdf">Export to PDF</string>
+    <string name="pdf_saved">PDF Saved: %1$s</string>
+    <string name="compilation_failed">Compilation Failed</string>
+    <string name="tab_editor">Editor</string>
+    <string name="tab_preview">Preview</string>
+    <string name="config_title">Settings</string>
+    <string name="config_editor_font_size">Editor font size</string>
+</resources>

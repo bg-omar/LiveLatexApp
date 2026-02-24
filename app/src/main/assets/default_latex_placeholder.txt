@@ -1,0 +1,125 @@
+\documentclass{article}
+
+% ==== Swirl String Theory (SST) macros ====
+% Context-aware subscript symbol; uses math styles, not \scriptsize
+\newcommand{\swirlarrow}{%
+    \mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}%
+    {\mkern-2mu\scriptstyle\boldsymbol{\circlearrowleft}}%
+    {\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}%
+    {\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowleft}}%
+}
+\newcommand{\swirlarrowcw}{%
+    \mathchoice{\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}%
+    {\mkern-2mu\scriptstyle\boldsymbol{\circlearrowright}}%
+    {\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}%
+    {\mkern-2mu\scriptscriptstyle\boldsymbol{\circlearrowright}}%
+}
+
+% Canonical symbols
+\newcommand{\vswirl}{\mathbf{v}_{\swirlarrow}}
+\newcommand{\vswirlcw}{\mathbf{v}_{\swirlarrowcw}}
+\newcommand{\SwirlClock}{S_{(t)}^{\swirlarrow}}
+\newcommand{\SwirlClockcw}{S_{(t)}^{\swirlarrowcw}}
+\newcommand{\omegas}{\boldsymbol{\omega}_{\swirlarrow}}  % swirl vorticity
+\newcommand{\vscore}{v_{\swirlarrow}}                    % shorthand: |v_swirl| at r=r_c
+\newcommand{\vnorm}{\lVert \vswirl \rVert}               % swirl speed magnitude
+\newcommand{\rhof}{\rho_{\!f}}                           % effective fluid density
+\newcommand{\rhoE}{\rho_{\!E}}                           % swirl energy density /c^2? (we define clearly below)
+\newcommand{\rhom}{\rho_{\!m}}                           % mass-equivalent density
+\newcommand{\rc}{r_c}                                    % string core radius (swirl string radius)
+\newcommand{\FmaxEM}{F_{\mathrm{EM}}^{\max}}             % EM-like maximal force scale
+\newcommand{\FmaxG}{F_{\mathrm{G}}^{\max}}               % G-like maximal force scale
+\newcommand{\Lam}{\Lambda}                               % Swirl Coulomb constant
+\newcommand{\Om}{\Omega_{\swirlarrow}}                   % swirl angular frequency profile
+\newcommand{\alpg}{\alpha_g}                             % gravitational fine-structure analogue
+
+\begin{document}
+   
+
+    \begin{abstract}
+
+        \begin{equation}
+            \vswirl = \frac{\Gamma}{2\pi r}\bigl(1-\exp(-r^2/\rc^2)\bigr)\hat{\bm{\phi}}
+        \end{equation}
+
+        \[\vswirlcw = -\frac{\Gamma}{2\pi r}\bigl(1-\exp(-r^2/\rc^2)\bigr)\hat{\bm{\phi}}\]
+
+        \begin{equation}
+            \SwirlClock = \int \rhof \vswirl \, dV
+        \end{equation}
+
+        Or as anti version \(\SwirlClockcw = \int \rhof \vswirlcw \, dV\).
+
+        $\omegas\quad \vscore\quad \vnorm\quad \rhof\quad \rhoE\quad \rhom\quad \rc\quad \FmaxEM\quad \FmaxG\quad \Lam\quad \Om$
+
+        inline equation $a^2 + b^2 = c^2$ type with \$...\$ dollar signs
+        and also like this \(e^{i\pi} + 1 = 0\) with \\( ... \).
+
+        But does it support \textbf{bold}, \textit{italic} and \underline{underline} text?.
+
+    \end{abstract}
+
+    \begin{equation}
+        3\frac{\dot a_\mathcal{D}^{\,2}}{a_\mathcal{D}^{\,2}}
+        = \frac{8\pi G}{c^2}\,\langle \rho c^2 \rangle_\mathcal{D}
+        - \tfrac{1}{2}\,\langle \mathcal{R} \rangle_\mathcal{D}
+        - \tfrac{1}{2}\,\mathcal{Q}_\mathcal{D},     
+    \end{equation}
+    \begin{equation}
+        3\frac{\ddot a_\mathcal{D}}{a_\mathcal{D}}
+        = -\frac{4\pi G}{c^2}\,\langle \rho c^2 \rangle_\mathcal{D}
+        + \mathcal{Q}_\mathcal{D}, \tag{F1}\label{F1}
+    \end{equation}
+ \section{Text}
+    Text\quad paragraphs and ligatures goes here.
+
+    \section{Characters}
+    Sample characters:
+    \$ \& \% \# \_ \{ \} \~{} \^{}
+
+
+    \section{Math}
+    Sample math formulae:
+    $f(x) = \int_{-\infty}^\infty \hat f(\xi)\,e^{2 \pi \xi} \, d\xi$
+
+    \section{Multicolumn}
+    \begin{multicols}{3}
+        Column 1
+        Column 2
+        Column 3
+    \end{multicols}
+
+\section{New Section $\omegas\quad$} This is a new section
+\subsection{New Subsection} This is a new subsection
+\subsubsection{New Subsubsection} This is a new subsubsection
+\paragraph{New Paragraph  $\omegas\quad$ } This is a new paragraph
+
+
+% Example table
+\begin{table}[h!]
+  \begin{center}
+    \caption{caption: Your first table.}
+    \label{tab:table1}
+    \begin{tabular}{l|c|r}
+      \textbf{Value 1} & \textbf{Value 2} & \textbf{Value 3}\\
+      $\alpha$ & $\beta$ & $\gamma$ \\
+      \hline
+      1 & 1110.1 & a\\
+      2 & 10.1 & b\\
+      3 & 23.113231 & c\\
+    \end{tabular}
+  \end{center}
+\end{table}
+
+
+    \section{Boxes}
+    \medbreak\noindent\fbox{\verb|\mbox{|\emph{Sample box}\verb|}|}\smallbreak
+
+    \section{Symbols}
+    Sample symbols:
+    \noindent \textfractionsolidus \textdiv \texttimes \textminus \textpm \textsurd \textlnot \textasteriskcentered
+    \textbullet \textperiodcentered \textdagger \textdaggerdbl \textsection \textparagraph \textbardbl \textellipsis
+    \textquotedblleft \textquotedblright \textquoteleft \textquoteright \textbackslash \textbullet \textemdash \textendash
+
+
+\end{document}
