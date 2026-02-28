@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidLayouts">
+    <shared>
+      <config />
+    </shared>
+    <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_background.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_foreground.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_config.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
+    </layouts>
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b8480210-f6c6-4ea1-83d6-93e0c3da24ad" name="Changes" comment="Fix: Add comprehensive SSL/TLS error handling and documentation&#10;&#10;This commit resolves persistent &quot;unable to find valid certification path&quot; errors during Gradle sync and within the application's WebView.&#10;&#10;Key changes:&#10;-   **Gradle SSL Fix**:&#10;    -   Upgrades Gradle Wrapper to 9.2.1.&#10;    -   Modifies `MainActivity.kt` to add an `onReceivedSslError` handler in the `WebViewClient`, allowing resources from CDNs like MathJax to load correctly.&#10;    -   Enables core library desugaring to support `java.time` APIs.&#10;-   **Troubleshooting Documentation and Scripts**:&#10;    -   Introduces extensive documentation (`START_HERE.md`, `GRADLE_SSL_TROUBLESHOOTING.md`, etc.) to guide users through fixing SSL issues.&#10;    -   Adds helper scripts (`fix-gradle-ssl.bat`, `fix-gradle-ssl.ps1`) to automate cleanup and diagnostics, such as clearing the Gradle cache and checking network connectivity.&#10;-   **Code Refinements**:&#10;    -   Replaces special character symbols with their Unicode equivalents in `LatexHtml.kt` for better rendering.&#10;-   **Assets**:&#10;    -   Adds new logo and icon assets for the project.">
+      <change beforePath="$PROJECT_DIR$/.idea/icon.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_C:/workspace/projects/LiveLatexApp" value="38fGEe7uWwAHvBtNwusFi1Qcu6B" />
+      <entry key="_C:/workspace/projects/LiveLatexApp/app" value="3ACYmN8OYpfLMEHpB8ElXyJbFNM" />
+    </persistenceIdMap>
+  </component>
+  <component name="CopilotUserSelectedModel">
+    <selectedModels>
+      <entry key="chat-panel" value="Auto" />
+      <entry key="agent-panel" value="Auto" />
+    </selectedModels>
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\oscar\.android\avd\Pixel_9_Pro_2.avd]" />
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="LiveLatexApp" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$/rust_core" value="local" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="SYNC" />
+  </component>
+  <component name="GithubDefaultAccount">
+    <option name="defaultAccountId" value="cb87385a-bb1c-43b6-a174-c4a6462e4498" />
+  </component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\oscar\.gradle\wrapper\dists\gradle-9.2.1-bin\2t0n5ozlw9xmuyvbp7dnzaxug\gradle-9.2.1" javaHome="C:\Program Files\JetBrains\IntelliJ IDEA 2025.2.3\jbr" gradleVersion="9.2.1" />
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="38fGEe7uWwAHvBtNwusFi1Qcu6B" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Android App.app.executor": "Run",
+    "Gradle.Configure Daemon JVM Criteria.executor": "Run",
+    "GradleDaemonJvmCriteriaMigrationNotification.isNotificationDisabled": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "false",
+    "android.gradle.sync.needed": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/workspace/projects/LiveLatexApp/app/src/main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "com.github.copilot.settings.customization.CustomizationConfigurable",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\workspace\projects\LiveLatexApp\app\src\main" />
+      <recent name="C:\workspace\projects\LiveLatexApp\app\src\main\res" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\workspace\projects\LiveLatexApp" />
+    </key>
+    <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
+      <recent name="com.omariskandarani.livelatexapp" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+      <module name="LiveLatexApp.app" />
+      <option name="ANDROID_RUN_CONFIGURATION_SCHEMA_VERSION" value="$GIT_TEST_DEBUG_UNSAFE_DIRECTORIES$" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="ALLOW_ASSUME_VERIFIED" value="false" />
+      <option name="CLEAR_APP_STORAGE" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="RESTORE_ENABLED" value="false" />
+      <option name="RESTORE_FILE" value="" />
+      <option name="RESTORE_FRESH_INSTALL_ONLY" value="false" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="DEBUGGER_TYPE" value="Java" />
+      <Java>
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Java>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.31033.145" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b8480210-f6c6-4ea1-83d6-93e0c3da24ad" name="Changes" comment="" />
+      <created>1769183101457</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1769183101457</updated>
+      <workItem from="1771916604743" duration="713000" />
+      <workItem from="1772097810684" duration="382000" />
+      <workItem from="1772291407285" duration="1173000" />
+      <workItem from="1772292617027" duration="476000" />
+    </task>
+    <task id="LOCAL-00001" summary="Add initial project structure and configuration files for LiveLatexApp">
+      <option name="closed" value="true" />
+      <created>1771917142893</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1771917142893</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Fix: Add comprehensive SSL/TLS error handling and documentation&#10;&#10;This commit resolves persistent &quot;unable to find valid certification path&quot; errors during Gradle sync and within the application's WebView.&#10;&#10;Key changes:&#10;-   **Gradle SSL Fix**:&#10;    -   Upgrades Gradle Wrapper to 9.2.1.&#10;    -   Modifies `MainActivity.kt` to add an `onReceivedSslError` handler in the `WebViewClient`, allowing resources from CDNs like MathJax to load correctly.&#10;    -   Enables core library desugaring to support `java.time` APIs.&#10;-   **Troubleshooting Documentation and Scripts**:&#10;    -   Introduces extensive documentation (`START_HERE.md`, `GRADLE_SSL_TROUBLESHOOTING.md`, etc.) to guide users through fixing SSL issues.&#10;    -   Adds helper scripts (`fix-gradle-ssl.bat`, `fix-gradle-ssl.ps1`) to automate cleanup and diagnostics, such as clearing the Gradle cache and checking network connectivity.&#10;-   **Code Refinements**:&#10;    -   Replaces special character symbols with their Unicode equivalents in `LatexHtml.kt` for better rendering.&#10;-   **Assets**:&#10;    -   Adds new logo and icon assets for the project.">
+      <option name="closed" value="true" />
+      <created>1771959474175</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1771959474175</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
+    <MESSAGE value="Add initial project structure and configuration files for LiveLatexApp" />
+    <MESSAGE value="Fix: Add comprehensive SSL/TLS error handling and documentation&#10;&#10;This commit resolves persistent &quot;unable to find valid certification path&quot; errors during Gradle sync and within the application's WebView.&#10;&#10;Key changes:&#10;-   **Gradle SSL Fix**:&#10;    -   Upgrades Gradle Wrapper to 9.2.1.&#10;    -   Modifies `MainActivity.kt` to add an `onReceivedSslError` handler in the `WebViewClient`, allowing resources from CDNs like MathJax to load correctly.&#10;    -   Enables core library desugaring to support `java.time` APIs.&#10;-   **Troubleshooting Documentation and Scripts**:&#10;    -   Introduces extensive documentation (`START_HERE.md`, `GRADLE_SSL_TROUBLESHOOTING.md`, etc.) to guide users through fixing SSL issues.&#10;    -   Adds helper scripts (`fix-gradle-ssl.bat`, `fix-gradle-ssl.ps1`) to automate cleanup and diagnostics, such as clearing the Gradle cache and checking network connectivity.&#10;-   **Code Refinements**:&#10;    -   Replaces special character symbols with their Unicode equivalents in `LatexHtml.kt` for better rendering.&#10;-   **Assets**:&#10;    -   Adds new logo and icon assets for the project." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix: Add comprehensive SSL/TLS error handling and documentation&#10;&#10;This commit resolves persistent &quot;unable to find valid certification path&quot; errors during Gradle sync and within the application's WebView.&#10;&#10;Key changes:&#10;-   **Gradle SSL Fix**:&#10;    -   Upgrades Gradle Wrapper to 9.2.1.&#10;    -   Modifies `MainActivity.kt` to add an `onReceivedSslError` handler in the `WebViewClient`, allowing resources from CDNs like MathJax to load correctly.&#10;    -   Enables core library desugaring to support `java.time` APIs.&#10;-   **Troubleshooting Documentation and Scripts**:&#10;    -   Introduces extensive documentation (`START_HERE.md`, `GRADLE_SSL_TROUBLESHOOTING.md`, etc.) to guide users through fixing SSL issues.&#10;    -   Adds helper scripts (`fix-gradle-ssl.bat`, `fix-gradle-ssl.ps1`) to automate cleanup and diagnostics, such as clearing the Gradle cache and checking network connectivity.&#10;-   **Code Refinements**:&#10;    -   Replaces special character symbols with their Unicode equivalents in `LatexHtml.kt` for better rendering.&#10;-   **Assets**:&#10;    -   Adds new logo and icon assets for the project." />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+  <component name="play_dynamic_filters_status">
+    <option name="appIdToCheckInfo">
+      <map>
+        <entry key="com.omariskandarani.livelatexapp">
+          <value>
+            <CheckInfo lastCheckTimestamp="1771873978542" />
+          </value>
+        </entry>
+        <entry key="com.omariskandarani.livelatexapp.test">
+          <value>
+            <CheckInfo lastCheckTimestamp="1771873978543" />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
