@@ -4,14 +4,12 @@ plugins {
 
 android {
     namespace = "com.omariskandarani.livelatexapp"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.omariskandarani.livelatexapp"
-        minSdk = 24
-        targetSdk = 36
+        minSdk = 26
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -33,17 +31,7 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    sourceSets {
-        getByName("main") {
-            // Tell Android where to find the Rust compiled libraries
-            jniLibs.srcDirs("src/main/jniLibs")
-        }
-    }
 
-    // Ensure 64-bit and 32-bit architectures are split correctly
-    packaging {
-        jniLibs.keepDebugSymbols.add("**/*.so")
-    }
 }
 
 dependencies {
@@ -58,3 +46,4 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
+
