@@ -25,24 +25,57 @@
           <theme>@style/Theme.LiveLatexApp</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic-launcher.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
     </layouts>
   </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b8480210-f6c6-4ea1-83d6-93e0c3da24ad" name="Changes" comment="Fix: Add comprehensive SSL/TLS error handling and documentation&#10;&#10;This commit resolves persistent &quot;unable to find valid certification path&quot; errors during Gradle sync and within the application's WebView.&#10;&#10;Key changes:&#10;-   **Gradle SSL Fix**:&#10;    -   Upgrades Gradle Wrapper to 9.2.1.&#10;    -   Modifies `MainActivity.kt` to add an `onReceivedSslError` handler in the `WebViewClient`, allowing resources from CDNs like MathJax to load correctly.&#10;    -   Enables core library desugaring to support `java.time` APIs.&#10;-   **Troubleshooting Documentation and Scripts**:&#10;    -   Introduces extensive documentation (`START_HERE.md`, `GRADLE_SSL_TROUBLESHOOTING.md`, etc.) to guide users through fixing SSL issues.&#10;    -   Adds helper scripts (`fix-gradle-ssl.bat`, `fix-gradle-ssl.ps1`) to automate cleanup and diagnostics, such as clearing the Gradle cache and checking network connectivity.&#10;-   **Code Refinements**:&#10;    -   Replaces special character symbols with their Unicode equivalents in `LatexHtml.kt` for better rendering.&#10;-   **Assets**:&#10;    -   Adds new logo and icon assets for the project.">
-      <change beforePath="$PROJECT_DIR$/.idea/icon.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" beforeDir="false" />
+    <list default="true" id="b8480210-f6c6-4ea1-83d6-93e0c3da24ad" name="Changes" comment="Add initial XML configuration files for project setup">
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic-launcher.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic-launcher.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic-launcher_background.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic-launcher_foreground.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic-launcher_monochrome.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic-launcher.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic-launcher_background.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic-launcher_foreground.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic-launcher_monochrome.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic-launcher.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic-launcher_background.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic-launcher_foreground.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic-launcher_monochrome.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic-launcher.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic-launcher_background.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic-launcher_foreground.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic-launcher_monochrome.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_background.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_background.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic-launcher.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic-launcher_background.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic-launcher_foreground.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic-launcher_monochrome.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher_background.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +87,7 @@
   </component>
   <component name="CopilotPersistence">
     <persistenceIdMap>
+      <entry key="_C:/workspace/projects/LiveLatex/LiveLatexApp" value="3AQeQ9aADrVNK9AYXrBx1TQ4e8w" />
       <entry key="_C:/workspace/projects/LiveLatexApp" value="38fGEe7uWwAHvBtNwusFi1Qcu6B" />
       <entry key="_C:/workspace/projects/LiveLatexApp/app" value="3ACYmN8OYpfLMEHpB8ElXyJbFNM" />
     </persistenceIdMap>
@@ -64,7 +98,7 @@
       <entry key="agent-panel" value="Auto" />
     </selectedModels>
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\oscar\.android\avd\Pixel_9_Pro_2.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\oscar\.android\avd\Pixel_9_Pro_Fold.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -109,7 +143,7 @@
   <component name="GithubDefaultAccount">
     <option name="defaultAccountId" value="cb87385a-bb1c-43b6-a174-c4a6462e4498" />
   </component>
-  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\Users\oscar\.gradle\wrapper\dists\gradle-9.2.1-bin\2t0n5ozlw9xmuyvbp7dnzaxug\gradle-9.2.1" javaHome="C:\Program Files\JetBrains\IntelliJ IDEA 2025.2.3\jbr" gradleVersion="9.2.1" />
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\workspace\Gradle\gradle-9.3.1\gradle-9.3.1" javaHome="C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot" gradleVersion="9.3.1" />
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -139,7 +173,7 @@
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/workspace/projects/LiveLatexApp/app/src/main",
+    "last_opened_file_path": "C:/workspace/projects/LiveLatex/LiveLatexApp",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -148,7 +182,7 @@
     "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "com.github.copilot.settings.customization.CustomizationConfigurable",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -227,7 +261,10 @@
       <workItem from="1771916604743" duration="713000" />
       <workItem from="1772097810684" duration="382000" />
       <workItem from="1772291407285" duration="1173000" />
-      <workItem from="1772292617027" duration="476000" />
+      <workItem from="1772292617027" duration="636000" />
+      <workItem from="1772463698139" duration="70000" />
+      <workItem from="1772527625923" duration="38000" />
+      <workItem from="1772529203962" duration="17000" />
     </task>
     <task id="LOCAL-00001" summary="Add initial project structure and configuration files for LiveLatexApp">
       <option name="closed" value="true" />
@@ -245,7 +282,23 @@
       <option name="project" value="LOCAL" />
       <updated>1771959474175</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Add initial XML configuration files for project setup">
+      <option name="closed" value="true" />
+      <created>1772293136780</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1772293136780</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Add initial XML configuration files for project setup">
+      <option name="closed" value="true" />
+      <created>1772293148456</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1772293148456</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -279,7 +332,8 @@
     <option name="CHECK_NEW_TODO" value="false" />
     <MESSAGE value="Add initial project structure and configuration files for LiveLatexApp" />
     <MESSAGE value="Fix: Add comprehensive SSL/TLS error handling and documentation&#10;&#10;This commit resolves persistent &quot;unable to find valid certification path&quot; errors during Gradle sync and within the application's WebView.&#10;&#10;Key changes:&#10;-   **Gradle SSL Fix**:&#10;    -   Upgrades Gradle Wrapper to 9.2.1.&#10;    -   Modifies `MainActivity.kt` to add an `onReceivedSslError` handler in the `WebViewClient`, allowing resources from CDNs like MathJax to load correctly.&#10;    -   Enables core library desugaring to support `java.time` APIs.&#10;-   **Troubleshooting Documentation and Scripts**:&#10;    -   Introduces extensive documentation (`START_HERE.md`, `GRADLE_SSL_TROUBLESHOOTING.md`, etc.) to guide users through fixing SSL issues.&#10;    -   Adds helper scripts (`fix-gradle-ssl.bat`, `fix-gradle-ssl.ps1`) to automate cleanup and diagnostics, such as clearing the Gradle cache and checking network connectivity.&#10;-   **Code Refinements**:&#10;    -   Replaces special character symbols with their Unicode equivalents in `LatexHtml.kt` for better rendering.&#10;-   **Assets**:&#10;    -   Adds new logo and icon assets for the project." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix: Add comprehensive SSL/TLS error handling and documentation&#10;&#10;This commit resolves persistent &quot;unable to find valid certification path&quot; errors during Gradle sync and within the application's WebView.&#10;&#10;Key changes:&#10;-   **Gradle SSL Fix**:&#10;    -   Upgrades Gradle Wrapper to 9.2.1.&#10;    -   Modifies `MainActivity.kt` to add an `onReceivedSslError` handler in the `WebViewClient`, allowing resources from CDNs like MathJax to load correctly.&#10;    -   Enables core library desugaring to support `java.time` APIs.&#10;-   **Troubleshooting Documentation and Scripts**:&#10;    -   Introduces extensive documentation (`START_HERE.md`, `GRADLE_SSL_TROUBLESHOOTING.md`, etc.) to guide users through fixing SSL issues.&#10;    -   Adds helper scripts (`fix-gradle-ssl.bat`, `fix-gradle-ssl.ps1`) to automate cleanup and diagnostics, such as clearing the Gradle cache and checking network connectivity.&#10;-   **Code Refinements**:&#10;    -   Replaces special character symbols with their Unicode equivalents in `LatexHtml.kt` for better rendering.&#10;-   **Assets**:&#10;    -   Adds new logo and icon assets for the project." />
+    <MESSAGE value="Add initial XML configuration files for project setup" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add initial XML configuration files for project setup" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
@@ -294,12 +348,12 @@
       <map>
         <entry key="com.omariskandarani.livelatexapp">
           <value>
-            <CheckInfo lastCheckTimestamp="1771873978542" />
+            <CheckInfo lastCheckTimestamp="1772293612201" />
           </value>
         </entry>
         <entry key="com.omariskandarani.livelatexapp.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1771873978543" />
+            <CheckInfo lastCheckTimestamp="1772293612202" />
           </value>
         </entry>
       </map>
