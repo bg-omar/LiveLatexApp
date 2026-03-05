@@ -1,11 +1,13 @@
 package com.omariskandarani.livelatexapp
 
 import android.content.Intent
+import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
@@ -15,7 +17,11 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
 import com.omariskandarani.livelatexapp.LatexCompiler
@@ -25,15 +31,55 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.util.regex.Pattern
 
+/** One open LaTeX document: content, optional saved URI, display name, dirty flag. */
+data class LatexDocument(
+    var content: String,
+    var savedUri: Uri? = null,
+    var displayName: String = "",
+    var isDirty: Boolean = false
+) {
+    fun effectiveName(): String = displayName.ifEmpty { "Untitled" }
+}
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var editText: EditText
+    private lateinit var btnSave: Button
+    private lateinit var btnOpen: Button
     private lateinit var btnExport: Button
+    private lateinit var btnPreview: Button
     private lateinit var btnConfig: ImageButton
     private lateinit var tabs: TabLayout
     private var previewJob: Job? = null
     private val debounceMs = 300L
+
+    private val documents = mutableListOf<LatexDocument>()
+    private var currentDocIndex: Int = 0
+    private var showPreview: Boolean = false
+    private var untitledCounter: Int = 0
+
+    private val createDocument = registerForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
+        uri?.let { savedUri ->
+            val content = pendingSaveContent ?: editText.text.toString()
+            saveContentToUri(content, savedUri)
+            val idx = pendingSaveThenCloseIndex
+            if (idx != null) {
+                documents.getOrNull(idx)?.let { d -> d.savedUri = savedUri; d.displayName = savedUri.lastPathSegment?.substringAfterLast('/') ?: d.effectiveName(); d.isDirty = false; d.content = content }
+                pendingSaveThenCloseIndex = null
+                pendingSaveContent = null
+                closeTabAt(idx)
+            } else {
+                documents.getOrNull(currentDocIndex)?.let { d -> d.savedUri = savedUri; d.displayName = savedUri.lastPathSegment?.substringAfterLast('/') ?: d.effectiveName(); d.isDirty = false; d.content = content }
+            }
+            refreshDocumentTabs()
+            Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private val openDocument = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { openUri(it) }
+    }
 
     companion object {
         private val INDEX_PATTERN = Pattern.compile("(?:at|near)?\\s*index\\s+(\\d+)", Pattern.CASE_INSENSITIVE)
@@ -45,16 +91,23 @@ class MainActivity : AppCompatActivity() {
 
         webView = findViewById(R.id.webviewPreview)
         editText = findViewById(R.id.inputLatex)
+        btnSave = findViewById(R.id.btnSave)
+        btnOpen = findViewById(R.id.btnOpen)
         btnExport = findViewById(R.id.btnExport)
+        btnPreview = findViewById(R.id.btnPreview)
         btnConfig = findViewById(R.id.btnConfig)
         tabs = findViewById(R.id.tabs)
 
-        setupTabs()
+        ensureAtLeastOneDocument()
+        setupDocumentTabs()
+        btnSave.setOnClickListener { saveCurrentDocument() }
+        btnOpen.setOnClickListener { openDocument.launch(arrayOf("text/plain", "application/x-tex", "*/*")) }
+        btnPreview.setOnClickListener { togglePreview() }
         btnConfig.setOnClickListener { startActivity(Intent(this, ConfigActivity::class.java)) }
         setupEditorPinchZoom()
         setupLivePreview()
         setupExportButton()
-        loadDefaultPlaceholder()
+        loadCurrentDocIntoEditor()
     }
 
     private fun setupEditorPinchZoom() {
@@ -86,31 +139,217 @@ class MainActivity : AppCompatActivity() {
         if (::editText.isInitialized) applyEditorFontSize()
     }
 
-    /** Temporary: load testfile-style content as initial editor text. */
-    private fun loadDefaultPlaceholder() {
-        try {
-            assets.open("default_latex_placeholder.txt").bufferedReader().use { reader ->
-                editText.setText(reader.readText())
-            }
-        } catch (_: Exception) { /* ignore if asset missing */ }
+    private fun ensureAtLeastOneDocument() {
+        if (documents.isEmpty()) {
+            untitledCounter++
+            documents.add(LatexDocument("", null, getString(R.string.untitled) + " $untitledCounter", false))
+            try {
+                assets.open("default_latex_placeholder.txt").bufferedReader().use { reader ->
+                    documents[0].content = reader.readText()
+                }
+            } catch (_: Exception) { }
+        }
     }
 
-    private fun setupTabs() {
-        tabs.addTab(tabs.newTab().setText(getString(R.string.tab_editor)))
-        tabs.addTab(tabs.newTab().setText(getString(R.string.tab_preview)))
+    private fun syncEditorToCurrentDoc() {
+        if (documents.isEmpty()) return
+        val doc = documents.getOrNull(currentDocIndex) ?: return
+        doc.content = editText.text.toString()
+    }
+
+    private fun loadCurrentDocIntoEditor() {
+        if (documents.isEmpty()) return
+        val doc = documents.getOrNull(currentDocIndex) ?: return
+        editText.setText(doc.content)
+        updatePreviewFromLatex(doc.content)
+    }
+
+    private fun togglePreview() {
+        showPreview = !showPreview
+        editText.visibility = if (showPreview) View.GONE else View.VISIBLE
+        webView.visibility = if (showPreview) View.VISIBLE else View.GONE
+    }
+
+    private fun setupDocumentTabs() {
+        tabs.removeAllTabs()
+        documents.forEachIndexed { index, doc ->
+            val tab = tabs.newTab()
+            tab.tag = index
+            tab.customView = makeDocTabView(doc.effectiveName(), index, withClose = true)
+            tabs.addTab(tab)
+        }
+        val newTab = tabs.newTab()
+        newTab.tag = -1
+        newTab.customView = makeDocTabView(getString(R.string.tab_new), -1, withClose = false)
+        tabs.addTab(newTab)
+
         tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                when (tab?.position) {
-                    0 -> { editText.visibility = View.VISIBLE; webView.visibility = View.GONE }
-                    1 -> { editText.visibility = View.GONE; webView.visibility = View.VISIBLE }
+                when (val tag = tab?.tag) {
+                    null -> { }
+                    -1 -> {
+                        syncEditorToCurrentDoc()
+                        untitledCounter++
+                        val newDoc = LatexDocument("", null, getString(R.string.untitled) + " $untitledCounter", false)
+                        documents.add(newDoc)
+                        currentDocIndex = documents.size - 1
+                        loadCurrentDocIntoEditor()
+                        refreshDocumentTabs()
+                    }
+                    else -> {
+                        val idx = tag as Int
+                        syncEditorToCurrentDoc()
+                        currentDocIndex = idx
+                        loadCurrentDocIntoEditor()
+                    }
                 }
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
-        // Start on Editor
-        editText.visibility = View.VISIBLE
-        webView.visibility = View.GONE
+        tabs.selectTab(tabs.getTabAt(currentDocIndex.coerceIn(0, documents.size - 1)))
+    }
+
+    private fun refreshDocumentTabs() {
+        tabs.removeAllTabs()
+        documents.forEachIndexed { index, doc ->
+            val name = doc.effectiveName() + if (doc.isDirty) " •" else ""
+            val tab = tabs.newTab()
+            tab.tag = index
+            tab.customView = makeDocTabView(name, index, withClose = true)
+            tabs.addTab(tab)
+        }
+        val newTab = tabs.newTab()
+        newTab.tag = -1
+        newTab.customView = makeDocTabView(getString(R.string.tab_new), -1, withClose = false)
+        tabs.addTab(newTab)
+        tabs.selectTab(tabs.getTabAt(currentDocIndex.coerceIn(0, documents.size)))
+    }
+
+    private fun updateCurrentTabLabel() {
+        val doc = documents.getOrNull(currentDocIndex) ?: return
+        val tab = tabs.getTabAt(currentDocIndex) ?: return
+        val name = doc.effectiveName() + if (doc.isDirty) " •" else ""
+        (tab.customView as? LinearLayout)?.getChildAt(0)?.let { child ->
+            (child as? TextView)?.text = name
+        }
+    }
+
+    private fun makeDocTabView(title: String, docIndex: Int, withClose: Boolean): View {
+        val wrap = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        val titleView = TextView(this).apply {
+            text = title
+            setPadding(0, 0, 12, 0)
+        }
+        wrap.addView(titleView)
+        if (withClose) {
+            val close = ImageButton(this).apply {
+                setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                background = null
+                setPadding(4, 4, 4, 4)
+                setOnClickListener { tryCloseTab(docIndex) }
+            }
+            wrap.addView(close)
+        }
+        return wrap
+    }
+
+    private fun tryCloseTab(index: Int) {
+        val doc = documents.getOrNull(index) ?: return
+        if (!doc.isDirty) {
+            closeTabAt(index)
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.save))
+            .setMessage(getString(R.string.close_tab_confirm, doc.effectiveName()))
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
+                saveDocumentAt(index) { success -> if (success) closeTabAt(index) }
+            }
+            .setNegativeButton(getString(R.string.discard)) { _, _ -> closeTabAt(index) }
+            .setNeutralButton(getString(R.string.cancel)) { _, _ -> }
+            .show()
+    }
+
+    private fun saveDocumentAt(index: Int, onDone: (Boolean) -> Unit) {
+        val doc = documents.getOrNull(index) ?: run { onDone(false); return }
+        val content = if (index == currentDocIndex) editText.text.toString() else doc.content
+        if (doc.savedUri != null) {
+            saveContentToUri(content, doc.savedUri!!)
+            doc.content = content
+            doc.isDirty = false
+            if (index == currentDocIndex) refreshDocumentTabs()
+            onDone(true)
+        } else {
+            pendingSaveThenCloseIndex = index
+            pendingSaveContent = content
+            createDocument.launch("document.tex")
+            onDone(true)
+        }
+    }
+
+    private var pendingSaveThenCloseIndex: Int? = null
+    private var pendingSaveContent: String? = null
+
+    private fun saveContentToUri(content: String, uri: Uri) {
+        try {
+            contentResolver.openOutputStream(uri)?.use { it.write(content.toByteArray(Charsets.UTF_8)) }
+            val idx = documents.indexOfFirst { it.savedUri == uri }
+            if (idx >= 0) {
+                documents[idx].content = content
+                documents[idx].isDirty = false
+                val name = uri.lastPathSegment?.substringAfterLast('/') ?: documents[idx].effectiveName()
+                documents[idx].displayName = name
+            }
+        } catch (e: Exception) {
+            runOnUiThread { Toast.makeText(this, e.message ?: "Save failed", Toast.LENGTH_SHORT).show() }
+        }
+    }
+
+    private fun closeTabAt(index: Int) {
+        if (index < 0 || index >= documents.size) return
+        syncEditorToCurrentDoc()
+        documents.removeAt(index)
+        if (currentDocIndex >= documents.size) currentDocIndex = (documents.size - 1).coerceAtLeast(0)
+        if (currentDocIndex > index) currentDocIndex--
+        ensureAtLeastOneDocument()
+        loadCurrentDocIntoEditor()
+        refreshDocumentTabs()
+    }
+
+    private fun saveCurrentDocument() {
+        val doc = documents.getOrNull(currentDocIndex) ?: return
+        syncEditorToCurrentDoc()
+        doc.content = editText.text.toString()
+        if (doc.savedUri != null) {
+            saveContentToUri(doc.content, doc.savedUri!!)
+            refreshDocumentTabs()
+            Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT).show()
+        } else {
+            pendingSaveThenCloseIndex = null
+            pendingSaveContent = editText.text.toString()
+            createDocument.launch("document.tex")
+        }
+    }
+
+    private fun openUri(uri: Uri) {
+        try {
+            contentResolver.openInputStream(uri)?.use { input ->
+                val content = input.bufferedReader().readText()
+                val name = uri.lastPathSegment?.substringAfterLast('/') ?: getString(R.string.untitled)
+                val newDoc = LatexDocument(content, uri, name, false)
+                syncEditorToCurrentDoc()
+                documents.add(newDoc)
+                currentDocIndex = documents.size - 1
+                loadCurrentDocIntoEditor()
+                refreshDocumentTabs()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, e.message ?: "Open failed", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupLivePreview() {
@@ -133,6 +372,8 @@ class MainActivity : AppCompatActivity() {
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val rawLatex = s?.toString() ?: ""
+                documents.getOrNull(currentDocIndex)?.isDirty = true
+                updateCurrentTabLabel()
                 previewJob?.cancel()
                 previewJob = CoroutineScope(Dispatchers.Main).launch {
                     delay(debounceMs)

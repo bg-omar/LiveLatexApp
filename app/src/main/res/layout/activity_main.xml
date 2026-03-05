@@ -13,11 +13,32 @@
         android:layout_margin="8dp">
 
         <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save"/>
+
+        <Button
+            android:id="@+id/btnOpen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="@string/open_file"/>
+
+        <Button
             android:id="@+id/btnExport"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="4dp"
             android:text="Export to PDF (MikTeX Style)"/>
+
+        <Button
+            android:id="@+id/btnPreview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="@string/preview"/>
 
         <ImageButton
             android:id="@+id/btnConfig"
@@ -34,7 +55,7 @@
         android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:tabMode="fixed"
+        app:tabMode="scrollable"
         app:tabGravity="fill"/>
 
     <FrameLayout

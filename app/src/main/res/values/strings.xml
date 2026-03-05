@@ -6,6 +6,17 @@
     <string name="compilation_failed">Compilation Failed</string>
     <string name="tab_editor">Editor</string>
     <string name="tab_preview">Preview</string>
+    <string name="tab_new">+</string>
     <string name="config_title">Settings</string>
     <string name="config_editor_font_size">Editor font size</string>
+    <string name="save">Save</string>
+    <string name="save_as">Save as…</string>
+    <string name="discard">Discard</string>
+    <string name="cancel">Cancel</string>
+    <string name="new_file">New file</string>
+    <string name="open_file">Open file</string>
+    <string name="untitled">Untitled</string>
+    <string name="close_tab_confirm">Save changes to \"%1$s\" before closing?</string>
+    <string name="saved">Saved</string>
+    <string name="preview">Preview</string>
 </resources>
