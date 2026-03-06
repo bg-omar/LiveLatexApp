@@ -19,4 +19,7 @@
     <string name="close_tab_confirm">Save changes to \"%1$s\" before closing?</string>
     <string name="saved">Saved</string>
     <string name="preview">Preview</string>
+    <string name="editor">Editor</string>
+    <string name="menu">Menu</string>
+    <string name="recent_files">Recent files</string>
 </resources>

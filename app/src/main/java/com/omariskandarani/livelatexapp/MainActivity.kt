@@ -19,16 +19,16 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.tabs.TabLayout
-import com.omariskandarani.livelatexapp.LatexCompiler
 import com.omariskandarani.livelatexapp.R
 import com.omariskandarani.livelatexapp.latex.LatexHtml
+import com.omariskandarani.livelatexapp.latex.LatexHighlighter
 import kotlinx.coroutines.*
-import java.io.File
 import java.util.regex.Pattern
 
 /** One open LaTeX document: content, optional saved URI, display name, dirty flag. */
@@ -45,13 +45,11 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
     private lateinit var editText: EditText
-    private lateinit var btnSave: Button
-    private lateinit var btnOpen: Button
-    private lateinit var btnExport: Button
+    private lateinit var btnMenu: ImageButton
     private lateinit var btnPreview: Button
-    private lateinit var btnConfig: ImageButton
     private lateinit var tabs: TabLayout
     private var previewJob: Job? = null
+    private var highlightJob: Job? = null
     private val debounceMs = 300L
 
     private val documents = mutableListOf<LatexDocument>()
@@ -63,14 +61,19 @@ class MainActivity : AppCompatActivity() {
         uri?.let { savedUri ->
             val content = pendingSaveContent ?: editText.text.toString()
             saveContentToUri(content, savedUri)
+            try {
+                contentResolver.takePersistableUriPermission(savedUri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            } catch (_: Exception) { }
+            val name = savedUri.lastPathSegment?.substringAfterLast('/') ?: "document.tex"
+            RecentFilesPrefs.addRecent(this, savedUri.toString(), name)
             val idx = pendingSaveThenCloseIndex
             if (idx != null) {
-                documents.getOrNull(idx)?.let { d -> d.savedUri = savedUri; d.displayName = savedUri.lastPathSegment?.substringAfterLast('/') ?: d.effectiveName(); d.isDirty = false; d.content = content }
+                documents.getOrNull(idx)?.let { d -> d.savedUri = savedUri; d.displayName = name; d.isDirty = false; d.content = content }
                 pendingSaveThenCloseIndex = null
                 pendingSaveContent = null
                 closeTabAt(idx)
             } else {
-                documents.getOrNull(currentDocIndex)?.let { d -> d.savedUri = savedUri; d.displayName = savedUri.lastPathSegment?.substringAfterLast('/') ?: d.effectiveName(); d.isDirty = false; d.content = content }
+                documents.getOrNull(currentDocIndex)?.let { d -> d.savedUri = savedUri; d.displayName = name; d.isDirty = false; d.content = content }
             }
             refreshDocumentTabs()
             Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT).show()
@@ -91,23 +94,85 @@ class MainActivity : AppCompatActivity() {
 
         webView = findViewById(R.id.webviewPreview)
         editText = findViewById(R.id.inputLatex)
-        btnSave = findViewById(R.id.btnSave)
-        btnOpen = findViewById(R.id.btnOpen)
-        btnExport = findViewById(R.id.btnExport)
+        btnMenu = findViewById(R.id.btnMenu)
         btnPreview = findViewById(R.id.btnPreview)
-        btnConfig = findViewById(R.id.btnConfig)
         tabs = findViewById(R.id.tabs)
 
+        btnMenu.setOnClickListener { showMenuSheet() }
+        btnPreview.setOnClickListener { togglePreview() }
         ensureAtLeastOneDocument()
         setupDocumentTabs()
-        btnSave.setOnClickListener { saveCurrentDocument() }
-        btnOpen.setOnClickListener { openDocument.launch(arrayOf("text/plain", "application/x-tex", "*/*")) }
-        btnPreview.setOnClickListener { togglePreview() }
-        btnConfig.setOnClickListener { startActivity(Intent(this, ConfigActivity::class.java)) }
         setupEditorPinchZoom()
         setupLivePreview()
-        setupExportButton()
         loadCurrentDocIntoEditor()
+    }
+
+    private fun showMenuSheet() {
+        val sheet = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_menu, null)
+        sheet.setContentView(view)
+
+        val btnSave = view.findViewById<Button>(R.id.btnSave)
+        val btnOpen = view.findViewById<Button>(R.id.btnOpen)
+        val seekFontSize = view.findViewById<android.widget.SeekBar>(R.id.seekEditorFontSize)
+        val labelFontSize = view.findViewById<TextView>(R.id.labelEditorFontSize)
+        val recentList = view.findViewById<LinearLayout>(R.id.recent_files_list)
+
+        btnSave.setOnClickListener { saveCurrentDocument(); sheet.dismiss() }
+        btnOpen.setOnClickListener {
+            openDocument.launch(arrayOf("text/plain", "application/x-tex", "*/*"))
+            sheet.dismiss()
+        }
+
+        val currentSp = EditorPrefs.getEditorFontSizeSp(this)
+        val progress = (currentSp - EditorPrefs.MIN_FONT_SIZE_SP).toInt().coerceIn(0, seekFontSize.max)
+        seekFontSize.progress = progress
+        labelFontSize.text = "${progress + EditorPrefs.MIN_FONT_SIZE_SP.toInt()} sp"
+        seekFontSize.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, p: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    val sizeSp = EditorPrefs.MIN_FONT_SIZE_SP + p
+                    EditorPrefs.setEditorFontSizeSp(this@MainActivity, sizeSp)
+                    labelFontSize.text = "${sizeSp.toInt()} sp"
+                    applyEditorFontSize()
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+
+        recentList.removeAllViews()
+        RecentFilesPrefs.getRecent(this).forEach { entry ->
+            TextView(this).apply {
+                text = entry.displayName
+                setPadding(0, 12, 0, 12)
+                setTextColor(0xFF1976D2.toInt())
+                setOnClickListener {
+                    sheet.dismiss()
+                    openRecentUri(entry.uri)
+                }
+            }.let { recentList.addView(it) }
+        }
+
+        sheet.show()
+    }
+
+    private fun openRecentUri(uriString: String) {
+        val uri = Uri.parse(uriString)
+        try {
+            contentResolver.openInputStream(uri)?.use { input ->
+                val content = input.bufferedReader().readText()
+                val name = uri.lastPathSegment?.substringAfterLast('/') ?: getString(R.string.untitled)
+                val newDoc = LatexDocument(content, uri, name, false)
+                syncEditorToCurrentDoc()
+                documents.add(newDoc)
+                currentDocIndex = documents.size - 1
+                loadCurrentDocIntoEditor()
+                refreshDocumentTabs()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, getString(R.string.open_file) + ": " + (e.message ?: ""), Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setupEditorPinchZoom() {
@@ -161,6 +226,7 @@ class MainActivity : AppCompatActivity() {
         if (documents.isEmpty()) return
         val doc = documents.getOrNull(currentDocIndex) ?: return
         editText.setText(doc.content)
+        LatexHighlighter.applyHighlighting(editText.text)
         updatePreviewFromLatex(doc.content)
     }
 
@@ -168,6 +234,7 @@ class MainActivity : AppCompatActivity() {
         showPreview = !showPreview
         editText.visibility = if (showPreview) View.GONE else View.VISIBLE
         webView.visibility = if (showPreview) View.VISIBLE else View.GONE
+        btnPreview.text = if (showPreview) getString(R.string.editor) else getString(R.string.preview)
     }
 
     private fun setupDocumentTabs() {
@@ -337,9 +404,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUri(uri: Uri) {
         try {
+            try {
+                contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            } catch (_: SecurityException) { }
             contentResolver.openInputStream(uri)?.use { input ->
                 val content = input.bufferedReader().readText()
                 val name = uri.lastPathSegment?.substringAfterLast('/') ?: getString(R.string.untitled)
+                RecentFilesPrefs.addRecent(this, uri.toString(), name)
                 val newDoc = LatexDocument(content, uri, name, false)
                 syncEditorToCurrentDoc()
                 documents.add(newDoc)
@@ -374,10 +445,17 @@ class MainActivity : AppCompatActivity() {
                 val rawLatex = s?.toString() ?: ""
                 documents.getOrNull(currentDocIndex)?.isDirty = true
                 updateCurrentTabLabel()
+                // Debounced preview update
                 previewJob?.cancel()
                 previewJob = CoroutineScope(Dispatchers.Main).launch {
                     delay(debounceMs)
                     updatePreviewFromLatex(rawLatex)
+                }
+                // Debounced syntax highlighting (keeps cursor stable)
+                highlightJob?.cancel()
+                highlightJob = CoroutineScope(Dispatchers.Main).launch {
+                    delay(150L)
+                    LatexHighlighter.applyHighlighting(s)
                 }
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -441,45 +519,4 @@ class MainActivity : AppCompatActivity() {
         return line
     }
 
-    private fun setupExportButton() {
-        btnExport.setOnClickListener {
-            val latexCode = editText.text.toString()
-            if (latexCode.isBlank()) return@setOnClickListener
-
-            btnExport.isEnabled = false
-            btnExport.text = getString(R.string.compiling_and_downloading)
-
-            // Run Heavy Rust compilation in the background
-            CoroutineScope(Dispatchers.IO).launch {
-
-                // Define output path
-                val exportDir = File(filesDir, "exports")
-                exportDir.mkdirs()
-                val outputFile = File(exportDir, "document.pdf")
-
-                // Define cache path (Tectonic needs this to save downloaded packages)
-                val cacheDirPath = cacheDir.absolutePath
-
-                // CALL THE RUST ENGINE
-                val success = LatexCompiler.compilePdf(
-                    latexCode,
-                    outputFile.absolutePath,
-                    cacheDirPath
-                )
-
-                // Return to Main Thread to update UI
-                withContext(Dispatchers.Main) {
-                    btnExport.isEnabled = true
-                    btnExport.text = getString(R.string.export_to_pdf)
-
-                    if (success) {
-                        Toast.makeText(this@MainActivity, getString(R.string.pdf_saved, outputFile.name), Toast.LENGTH_LONG).show()
-                        // Here you could launch an Intent to view the PDF
-                    } else {
-                        Toast.makeText(this@MainActivity, getString(R.string.compilation_failed), Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
-    }
 }

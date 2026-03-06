@@ -1,82 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
+    <!-- Editor and preview: full screen, paddingBottom for bottom bar -->
+    <EditText
+        android:id="@+id/inputLatex"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="72dp"
+        android:paddingTop="16dp"
+        android:gravity="top|start"
+        android:fontFamily="monospace"
+        android:textSize="14sp"
+        android:hint="Type LaTeX here... \nExample:\n\\usepackage{physics}\n\\begin{document}\n$\\ket{\\psi}$\n\\end{document}"/>
+
+    <WebView
+        android:id="@+id/webviewPreview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="72dp"
+        android:paddingTop="16dp"
+        android:visibility="gone"/>
+
+    <!-- Bottom bar: follows light/dark mode, teal accent -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_gravity="bottom"
+        android:background="?attr/colorSurface"
+        android:elevation="8dp"
         android:gravity="center_vertical"
-        android:layout_margin="8dp">
+        android:orientation="horizontal"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
 
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save"/>
+        <ImageButton
+            android:id="@+id/btnMenu"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/menu"
+            android:src="@drawable/ic_menu_hamburger"
+            android:scaleType="centerInside"/>
 
-        <Button
-            android:id="@+id/btnOpen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:text="@string/open_file"/>
-
-        <Button
-            android:id="@+id/btnExport"
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:text="Export to PDF (MikTeX Style)"/>
+            app:tabMode="scrollable"
+            app:tabGravity="fill"/>
 
         <Button
             android:id="@+id/btnPreview"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="4dp"
+            android:minWidth="88dp"
             android:text="@string/preview"/>
-
-        <ImageButton
-            android:id="@+id/btnConfig"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/config_title"
-            android:src="@android:drawable/ic_menu_preferences"
-            android:scaleType="centerInside"/>
     </LinearLayout>
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:tabMode="scrollable"
-        app:tabGravity="fill"/>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <EditText
-            android:id="@+id/inputLatex"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="top|start"
-            android:padding="16dp"
-            android:fontFamily="monospace"
-            android:textSize="14sp"
-            android:hint="Type LaTeX here... \nExample:\n\\usepackage{physics}\n\\begin{document}\n$\\ket{\\psi}$\n\\end{document}"/>
-
-        <WebView
-            android:id="@+id/webviewPreview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"/>
-    </FrameLayout>
-</LinearLayout>
+</FrameLayout>
