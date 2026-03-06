@@ -195,6 +195,3 @@ $body
         return out
     }
 }
-
-private fun escapeHtmlKeepBackslashes(s: String): String =
-    s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")

@@ -5,28 +5,80 @@
     android:layout_height="match_parent">
 
     <!-- Editor and preview: full screen, paddingBottom for bottom bar -->
-    <EditText
-        android:id="@+id/inputLatex"
+    <LinearLayout
+        android:id="@+id/editorContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:orientation="vertical"
         android:paddingBottom="72dp"
-        android:paddingTop="16dp"
-        android:gravity="top|start"
-        android:fontFamily="monospace"
-        android:textSize="14sp"
-        android:hint="Type LaTeX here... \nExample:\n\\usepackage{physics}\n\\begin{document}\n$\\ket{\\psi}$\n\\end{document}"/>
+        android:background="?attr/colorSurface">
 
-    <WebView
-        android:id="@+id/webviewPreview"
+        <HorizontalScrollView
+            android:id="@+id/symbolToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:paddingVertical="4dp"
+            android:background="?attr/colorSurfaceVariant">
+
+            <LinearLayout
+                android:id="@+id/symbolToolbarButtons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"/>
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+        <com.omariskandarani.livelatexapp.LineNumberView
+            android:id="@+id/lineNumbers"
+            android:layout_width="32dp"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:background="?attr/colorSurfaceVariant"/>
+
+        <EditText
+            android:id="@+id/inputLatex"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="16dp"
+            android:gravity="top|start"
+            android:fontFamily="monospace"
+            android:textSize="14sp"
+            android:hint="Type LaTeX here... \nExample:\n\\usepackage{physics}\n\\begin{document}\n$\\ket{\\psi}$\n\\end{document}"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="72dp"
-        android:paddingTop="16dp"
-        android:visibility="gone"/>
+        android:layout_gravity="top">
+
+        <WebView
+            android:id="@+id/webviewPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="72dp"
+            android:paddingTop="16dp"
+            android:visibility="gone"/>
+
+        <ProgressBar
+            android:id="@+id/previewLoadingIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+    </FrameLayout>
 
     <!-- Bottom bar: follows light/dark mode, teal accent -->
     <LinearLayout
@@ -49,6 +101,33 @@
             android:src="@drawable/ic_menu_hamburger"
             android:scaleType="centerInside"/>
 
+        <ImageView
+            android:id="@+id/saveStatusIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="@string/saved"
+            android:src="@drawable/ic_saved"/>
+
+        <ImageButton
+            android:id="@+id/btnUndo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/undo"
+            android:src="@drawable/ic_undo"
+            android:scaleType="centerInside"/>
+
+        <ImageButton
+            android:id="@+id/btnRedo"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/redo"
+            android:src="@drawable/ic_redo"
+            android:scaleType="centerInside"/>
+
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
             android:layout_width="0dp"
@@ -57,11 +136,13 @@
             app:tabMode="scrollable"
             app:tabGravity="fill"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPreview"
+            style="@style/Widget.Material3.Button"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginEnd="4dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
             android:minWidth="88dp"
             android:text="@string/preview"/>
     </LinearLayout>

@@ -41,4 +41,24 @@ object RecentFilesPrefs {
             .putString(KEY_RECENT, arr.toString())
             .apply()
     }
+
+    fun removeRecent(context: Context, uri: String) {
+        val current = getRecent(context).toMutableList()
+        current.removeAll { it.uri == uri }
+        val arr = JSONArray()
+        current.forEach { e ->
+            arr.put(JSONObject().put("uri", e.uri).put("name", e.displayName))
+        }
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putString(KEY_RECENT, arr.toString())
+            .apply()
+    }
+
+    fun clearRecent(context: Context) {
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .remove(KEY_RECENT)
+            .apply()
+    }
 }

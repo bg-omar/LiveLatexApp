@@ -5,4 +5,9 @@
     <!-- Teal green accent -->
     <color name="teal_500">#00897B</color>
     <color name="teal_700">#00695C</color>
+    <!-- Semantic colors -->
+    <color name="success_green">#4CAF50</color>
+    <color name="warning_orange">#FF9800</color>
+    <color name="error_red">#F44336</color>
+    <color name="info_blue">#2196F3</color>
 </resources>

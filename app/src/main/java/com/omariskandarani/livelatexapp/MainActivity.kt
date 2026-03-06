@@ -1,12 +1,17 @@
 package com.omariskandarani.livelatexapp
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.print.PrintAttributes
+import android.print.PrintManager
 import android.net.http.SslError
 import android.os.Bundle
 import android.text.Editable
+import android.text.Selection
 import android.text.TextWatcher
 import android.util.TypedValue
+import android.view.KeyEvent
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -15,20 +20,30 @@ import android.webkit.SslErrorHandler
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
+import com.omariskandarani.livelatexapp.BuildConfig
 import com.omariskandarani.livelatexapp.R
+import com.omariskandarani.livelatexapp.cloud.CloudPrefs
+import com.omariskandarani.livelatexapp.cloud.GitHubOAuthHelper
+import com.omariskandarani.livelatexapp.cloud.GoogleDriveHelper
 import com.omariskandarani.livelatexapp.latex.LatexHtml
 import com.omariskandarani.livelatexapp.latex.LatexHighlighter
 import kotlinx.coroutines.*
+import java.util.ArrayDeque
 import java.util.regex.Pattern
 
 /** One open LaTeX document: content, optional saved URI, display name, dirty flag. */
@@ -44,13 +59,25 @@ data class LatexDocument(
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private lateinit var previewLoadingIndicator: View
     private lateinit var editText: EditText
+    private lateinit var editorContainer: View
+    private lateinit var lineNumberView: com.omariskandarani.livelatexapp.LineNumberView
     private lateinit var btnMenu: ImageButton
     private lateinit var btnPreview: Button
+    private lateinit var saveStatusIcon: ImageView
     private lateinit var tabs: TabLayout
     private var previewJob: Job? = null
     private var highlightJob: Job? = null
+    private var autoSaveJob: Job? = null
+    private var undoPushJob: Job? = null
     private val debounceMs = 300L
+    private val undoPushDelayMs = 1500L
+    private val maxUndoSize = 50
+
+    private val undoStack = ArrayDeque<String>()
+    private val redoStack = ArrayDeque<String>()
+    private var isUndoRedoAction = false
 
     private val documents = mutableListOf<LatexDocument>()
     private var currentDocIndex: Int = 0
@@ -64,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 contentResolver.takePersistableUriPermission(savedUri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             } catch (_: Exception) { }
-            val name = savedUri.lastPathSegment?.substringAfterLast('/') ?: "document.tex"
+            val name = getFileNameFromUri(savedUri)
             RecentFilesPrefs.addRecent(this, savedUri.toString(), name)
             val idx = pendingSaveThenCloseIndex
             if (idx != null) {
@@ -84,36 +111,174 @@ class MainActivity : AppCompatActivity() {
         uri?.let { openUri(it) }
     }
 
+    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (result.resultCode == RESULT_OK) {
+            GoogleDriveHelper.handleSignInResult(this, data)
+        }
+    }
+
     companion object {
         private val INDEX_PATTERN = Pattern.compile("(?:at|near)?\\s*index\\s+(\\d+)", Pattern.CASE_INSENSITIVE)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppCompatDelegate.setDefaultNightMode(EditorPrefs.getNightMode(this))
         setContentView(R.layout.activity_main)
 
         webView = findViewById(R.id.webviewPreview)
+        previewLoadingIndicator = findViewById(R.id.previewLoadingIndicator)
+        editorContainer = findViewById(R.id.editorContainer)
         editText = findViewById(R.id.inputLatex)
+        lineNumberView = findViewById(R.id.lineNumbers)
         btnMenu = findViewById(R.id.btnMenu)
         btnPreview = findViewById(R.id.btnPreview)
         tabs = findViewById(R.id.tabs)
+        saveStatusIcon = findViewById(R.id.saveStatusIcon)
+        val btnUndo = findViewById<ImageButton>(R.id.btnUndo)
+        val btnRedo = findViewById<ImageButton>(R.id.btnRedo)
 
         btnMenu.setOnClickListener { showMenuSheet() }
         btnPreview.setOnClickListener { togglePreview() }
+        btnUndo.setOnClickListener { performUndo() }
+        btnRedo.setOnClickListener { performRedo() }
         ensureAtLeastOneDocument()
         setupDocumentTabs()
         setupEditorPinchZoom()
         setupLivePreview()
+        setupAutoSave()
+        setupLineNumbers()
+        setupSymbolToolbar()
         loadCurrentDocIntoEditor()
+        updateSaveStatusIcon()
+        showTemplatesOnFirstLaunch()
+        handleGitHubOAuthCallback(intent)
+    }
+
+    private fun updateSaveStatusIcon() {
+        val doc = documents.getOrNull(currentDocIndex)
+        val isDirty = doc?.isDirty == true
+        saveStatusIcon.setImageResource(if (isDirty) R.drawable.ic_unsaved else R.drawable.ic_saved)
+        saveStatusIcon.contentDescription = if (isDirty) getString(R.string.unsaved_changes) else getString(R.string.saved)
+    }
+
+    private fun showTemplatesOnFirstLaunch() {
+        if (!EditorPrefs.isFirstLaunchDone(this)) {
+            EditorPrefs.setFirstLaunchDone(this)
+            showTemplatesDialog()
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleGitHubOAuthCallback(intent)
+    }
+
+    private fun handleGitHubOAuthCallback(intent: Intent?) {
+        val uri = intent?.data ?: return
+        if (uri.scheme != "livelatex" || uri.host != "github-callback") return
+        CoroutineScope(Dispatchers.Main).launch {
+            GitHubOAuthHelper.handleCallback(
+                this@MainActivity,
+                uri,
+                BuildConfig.GITHUB_CLIENT_ID,
+                BuildConfig.GITHUB_CLIENT_SECRET.ifBlank { null }
+            )
+        }
+    }
+
+    private fun setupSymbolToolbar() {
+        val container = findViewById<LinearLayout>(R.id.symbolToolbarButtons)
+        val symbols = listOf(
+            "$", "\\", "{", "}", "[", "]", "^", "_",
+            "\\frac{}{}", "\\begin{}\n\n\\end{}", "\\alpha", "\\beta", "\\sum", "\\int", "\\sqrt{}"
+        )
+        for (sym in symbols) {
+            val itemView = layoutInflater.inflate(R.layout.item_symbol_button, container, false)
+            val btn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.symbolButton)
+            btn.text = sym.take(8).let { if (sym.length > 8) "$it…" else it }
+            btn.setOnClickListener { insertAtCursor(sym) }
+            container.addView(itemView)
+        }
+    }
+
+    private fun insertAtCursor(text: String) {
+        val start = editText.selectionStart.coerceIn(0, editText.text.length)
+        val end = editText.selectionEnd.coerceIn(0, editText.text.length)
+        editText.text.replace(start, end, text)
+        val newPos = start + text.length
+        editText.setSelection(newPos.coerceIn(0, editText.text.length))
+        documents.getOrNull(currentDocIndex)?.isDirty = true
+        updateCurrentTabLabel()
+    }
+
+    private fun setupLineNumbers() {
+        lineNumberView.setEditText(editText)
+        lineNumberView.visibility = if (EditorPrefs.getShowLineNumbers(this)) View.VISIBLE else View.GONE
+        editText.setOnScrollChangeListener { _, _, _, _, _ -> lineNumberView.invalidate() }
+    }
+
+    override fun onDestroy() {
+        autoSaveJob?.cancel()
+        super.onDestroy()
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
+        if (event?.action == KeyEvent.ACTION_DOWN && event.isCtrlPressed) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_S -> { saveCurrentDocument(); return true }
+                KeyEvent.KEYCODE_O -> { openDocument.launch(arrayOf("text/plain", "application/x-tex", "*/*")); return true }
+                KeyEvent.KEYCODE_F -> { showFindReplaceDialog(); return true }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    private fun setupAutoSave() {
+        autoSaveJob?.cancel()
+        if (!EditorPrefs.isAutoSaveEnabled(this)) return
+        val intervalMs = EditorPrefs.getAutoSaveIntervalSec(this) * 1000L
+        autoSaveJob = CoroutineScope(Dispatchers.Main).launch {
+            while (isActive) {
+                delay(intervalMs)
+                val doc = documents.getOrNull(currentDocIndex) ?: continue
+                if (doc.isDirty && doc.savedUri != null) {
+                    syncEditorToCurrentDoc()
+                    doc.content = editText.text.toString()
+                    saveContentToUri(doc.content, doc.savedUri!!)
+                    doc.isDirty = false
+                    refreshDocumentTabs()
+                }
+            }
+        }
     }
 
     private fun showMenuSheet() {
         val sheet = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.bottom_sheet_menu, null)
         sheet.setContentView(view)
+        sheet.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+        sheet.behavior.isFitToContents = false
+
+        val btnThemeLight = view.findViewById<Button>(R.id.btnThemeLight)
+        val btnThemeDark = view.findViewById<Button>(R.id.btnThemeDark)
+        val btnThemeSystem = view.findViewById<Button>(R.id.btnThemeSystem)
+        fun applyTheme(mode: Int) {
+            EditorPrefs.setNightMode(this@MainActivity, mode)
+            AppCompatDelegate.setDefaultNightMode(mode)
+            sheet.dismiss()
+            recreate()
+        }
+        btnThemeLight.setOnClickListener { applyTheme(AppCompatDelegate.MODE_NIGHT_NO) }
+        btnThemeDark.setOnClickListener { applyTheme(AppCompatDelegate.MODE_NIGHT_YES) }
+        btnThemeSystem.setOnClickListener { applyTheme(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) }
 
         val btnSave = view.findViewById<Button>(R.id.btnSave)
         val btnOpen = view.findViewById<Button>(R.id.btnOpen)
+        val btnTemplates = view.findViewById<Button>(R.id.btnTemplates)
+        val btnFindReplace = view.findViewById<Button>(R.id.btnFindReplace)
         val seekFontSize = view.findViewById<android.widget.SeekBar>(R.id.seekEditorFontSize)
         val labelFontSize = view.findViewById<TextView>(R.id.labelEditorFontSize)
         val recentList = view.findViewById<LinearLayout>(R.id.recent_files_list)
@@ -121,6 +286,48 @@ class MainActivity : AppCompatActivity() {
         btnSave.setOnClickListener { saveCurrentDocument(); sheet.dismiss() }
         btnOpen.setOnClickListener {
             openDocument.launch(arrayOf("text/plain", "application/x-tex", "*/*"))
+            sheet.dismiss()
+        }
+        btnTemplates.setOnClickListener {
+            sheet.dismiss()
+            showTemplatesDialog()
+        }
+        btnFindReplace.setOnClickListener {
+            sheet.dismiss()
+            showFindReplaceDialog()
+        }
+        val btnExportPdf = view.findViewById<Button>(R.id.btnExportPdf)
+        btnExportPdf.setOnClickListener {
+            sheet.dismiss()
+            exportPreviewToPdf()
+        }
+        val btnJumpToLine = view.findViewById<Button>(R.id.btnJumpToLine)
+        btnJumpToLine.setOnClickListener {
+            sheet.dismiss()
+            showJumpToLineDialog()
+        }
+        val checkLineNumbers = view.findViewById<CheckBox>(R.id.checkLineNumbers)
+        checkLineNumbers.isChecked = EditorPrefs.getShowLineNumbers(this)
+        checkLineNumbers.setOnCheckedChangeListener { _, isChecked ->
+            EditorPrefs.setShowLineNumbers(this@MainActivity, isChecked)
+            lineNumberView.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
+        val documentStats = view.findViewById<TextView>(R.id.documentStats)
+        val content = editText.text.toString()
+        val words = content.split(Regex("\\s+")).count { it.isNotEmpty() }
+        documentStats.text = getString(R.string.word_count, words, content.length)
+
+        val btnConnectGitHub = view.findViewById<Button>(R.id.btnConnectGitHub)
+        val btnConnectGoogleDrive = view.findViewById<Button>(R.id.btnConnectGoogleDrive)
+        btnConnectGitHub.text = if (CloudPrefs.isGitHubConnected(this)) getString(R.string.connected_github) else getString(R.string.connect_github)
+        btnConnectGoogleDrive.text = if (CloudPrefs.isGoogleDriveConnected(this)) getString(R.string.connected_google_drive) else getString(R.string.connect_google_drive)
+        btnConnectGitHub.setOnClickListener {
+            GitHubOAuthHelper.launchSignIn(this, BuildConfig.GITHUB_CLIENT_ID, BuildConfig.GITHUB_CLIENT_SECRET.ifBlank { null })
+            sheet.dismiss()
+        }
+        btnConnectGoogleDrive.setOnClickListener {
+            val client = GoogleDriveHelper.getSignInClient(this, BuildConfig.GOOGLE_WEB_CLIENT_ID.ifBlank { null })
+            googleSignInLauncher.launch(client.signInIntent)
             sheet.dismiss()
         }
 
@@ -142,19 +349,255 @@ class MainActivity : AppCompatActivity() {
         })
 
         recentList.removeAllViews()
-        RecentFilesPrefs.getRecent(this).forEach { entry ->
+        val recentFiles = RecentFilesPrefs.getRecent(this)
+        if (recentFiles.isEmpty()) {
             TextView(this).apply {
-                text = entry.displayName
+                text = getString(R.string.no_recent_files)
                 setPadding(0, 12, 0, 12)
-                setTextColor(0xFF1976D2.toInt())
-                setOnClickListener {
+                setTextColor(0xFF9E9E9E.toInt())
+            }.let { recentList.addView(it) }
+        } else {
+            recentFiles.forEach { entry ->
+                val itemView = layoutInflater.inflate(R.layout.item_recent_file, recentList, false)
+                val fileName = itemView.findViewById<TextView>(R.id.file_name)
+                val filePath = itemView.findViewById<TextView>(R.id.file_path)
+                val btnRemove = itemView.findViewById<ImageButton>(R.id.btn_remove)
+
+                fileName.text = entry.displayName
+                filePath.text = Uri.parse(entry.uri).path ?: entry.uri
+
+                itemView.setOnClickListener {
                     sheet.dismiss()
                     openRecentUri(entry.uri)
                 }
+
+                btnRemove.setOnClickListener {
+                    RecentFilesPrefs.removeRecent(this, entry.uri)
+                    recentList.removeView(itemView)
+                    if (recentList.childCount == 0) {
+                        TextView(this).apply {
+                            text = getString(R.string.no_recent_files)
+                            setPadding(0, 12, 0, 12)
+                            setTextColor(0xFF9E9E9E.toInt())
+                        }.let { recentList.addView(it) }
+                    }
+                }
+
+                recentList.addView(itemView)
+            }
+        }
+
+        val btnClearRecent = view.findViewById<Button>(R.id.btnClearRecent)
+        btnClearRecent.setOnClickListener {
+            RecentFilesPrefs.clearRecent(this)
+            recentList.removeAllViews()
+            TextView(this).apply {
+                text = getString(R.string.no_recent_files)
+                setPadding(0, 12, 0, 12)
+                setTextColor(0xFF9E9E9E.toInt())
             }.let { recentList.addView(it) }
         }
 
         sheet.show()
+    }
+
+    private fun showFindReplaceDialog() {
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_find_replace, null)
+        dialog.setContentView(view)
+
+        val editFind = view.findViewById<EditText>(R.id.editFind)
+        val editReplace = view.findViewById<EditText>(R.id.editReplace)
+        val findMatchCount = view.findViewById<TextView>(R.id.findMatchCount)
+        val btnFindPrevious = view.findViewById<Button>(R.id.btnFindPrevious)
+        val btnFindNext = view.findViewById<Button>(R.id.btnFindNext)
+        val btnReplace = view.findViewById<Button>(R.id.btnReplace)
+        val btnReplaceAll = view.findViewById<Button>(R.id.btnReplaceAll)
+        val btnClose = view.findViewById<Button>(R.id.btnFindClose)
+
+        fun countMatches(): Int {
+            val find = editFind.text.toString()
+            if (find.isEmpty()) return 0
+            return editText.text.toString().split(find).size - 1
+        }
+
+        fun currentMatchIndex(): Int {
+            val find = editFind.text.toString()
+            if (find.isEmpty()) return 0
+            val text = editText.text.toString()
+            val selStart = Selection.getSelectionStart(editText.text).coerceIn(0, text.length)
+            var count = 0
+            var idx = 0
+            while (idx < text.length) {
+                val found = text.indexOf(find, idx)
+                if (found < 0) break
+                count++
+                if (selStart in found until found + find.length) return count
+                idx = found + 1
+            }
+            return count
+        }
+
+        fun updateMatchCount() {
+            val total = countMatches()
+            if (total == 0) {
+                findMatchCount.visibility = View.GONE
+            } else {
+                findMatchCount.visibility = View.VISIBLE
+                val current = currentMatchIndex()
+                findMatchCount.text = getString(R.string.find_match_count, current, total)
+            }
+        }
+
+        fun findNext(forward: Boolean): Boolean {
+            val find = editFind.text.toString()
+            if (find.isEmpty()) return false
+            val text = editText.text.toString()
+            val start = Selection.getSelectionStart(editText.text).coerceIn(0, text.length)
+            val end = Selection.getSelectionEnd(editText.text).coerceIn(0, text.length)
+            val searchStart = if (forward) end else start - 1
+            val idx = if (forward) {
+                text.indexOf(find, searchStart).takeIf { it >= 0 }
+                    ?: text.indexOf(find, 0).takeIf { it < searchStart }
+            } else {
+                text.lastIndexOf(find, searchStart.coerceAtLeast(0)).takeIf { it >= 0 }
+                    ?: text.lastIndexOf(find, text.length).takeIf { it > searchStart }
+            }
+            if (idx != null && idx >= 0) {
+                editText.setSelection(idx, idx + find.length)
+                updateMatchCount()
+                return true
+            }
+            return false
+        }
+
+        btnFindNext.setOnClickListener {
+            if (!findNext(true)) Toast.makeText(this, getString(R.string.find) + ": no match", Toast.LENGTH_SHORT).show()
+            else updateMatchCount()
+        }
+        btnFindPrevious.setOnClickListener {
+            if (!findNext(false)) Toast.makeText(this, getString(R.string.find) + ": no match", Toast.LENGTH_SHORT).show()
+            else updateMatchCount()
+        }
+        btnReplace.setOnClickListener {
+            val find = editFind.text.toString()
+            if (find.isEmpty()) return@setOnClickListener
+            val rep = editReplace.text.toString()
+            val start = Selection.getSelectionStart(editText.text)
+            val end = Selection.getSelectionEnd(editText.text)
+            val sel = editText.text.toString().substring(start.coerceAtLeast(0), end.coerceAtMost(editText.text.length))
+            if (sel == find) {
+                editText.text.replace(start, end, rep)
+                documents.getOrNull(currentDocIndex)?.isDirty = true
+                updateCurrentTabLabel()
+                findNext(true)
+                updateMatchCount()
+            } else {
+                if (!findNext(true)) Toast.makeText(this, getString(R.string.find) + ": no match", Toast.LENGTH_SHORT).show()
+                else updateMatchCount()
+            }
+        }
+        btnReplaceAll.setOnClickListener {
+            val find = editFind.text.toString()
+            if (find.isEmpty()) return@setOnClickListener
+            val rep = editReplace.text.toString()
+            val original = editText.text.toString()
+            val count = original.split(find).size - 1
+            if (count > 0) {
+                val newText = original.replace(find, rep)
+                editText.setText(newText)
+                documents.getOrNull(currentDocIndex)?.content = newText
+                documents.getOrNull(currentDocIndex)?.isDirty = true
+                updateCurrentTabLabel()
+                LatexHighlighter.applyHighlighting(editText.text)
+                updatePreviewFromLatex(newText)
+            }
+            Toast.makeText(this, "Replaced $count occurrence(s)", Toast.LENGTH_SHORT).show()
+        }
+        btnClose.setOnClickListener { dialog.dismiss() }
+
+        dialog.show()
+    }
+
+    private fun exportPreviewToPdf() {
+        val printManager = getSystemService(Context.PRINT_SERVICE) as? PrintManager ?: return
+        val jobName = getString(R.string.app_name) + " - " + (documents.getOrNull(currentDocIndex)?.effectiveName() ?: "document")
+        val adapter = webView.createPrintDocumentAdapter(jobName)
+        printManager.print(jobName, adapter, PrintAttributes.Builder().build())
+        Toast.makeText(this, getString(R.string.export_to_pdf) + " – " + getString(R.string.preview), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun showJumpToLineDialog() {
+        val view = layoutInflater.inflate(R.layout.dialog_jump_to_line, null)
+        val input = view.findViewById<EditText>(R.id.editLineNumber)
+        val maxLine = editText.text.toString().count { it == '\n' } + 1
+        input.hint = getString(R.string.line_number) + " (1–$maxLine)"
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.jump_to_line))
+            .setView(view)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val lineStr = input.text.toString()
+                val line = lineStr.toIntOrNull()?.coerceIn(1, Int.MAX_VALUE) ?: return@setPositiveButton
+                val text = editText.text.toString()
+                var offset = 0
+                var currentLine = 1
+                for (i in text.indices) {
+                    if (currentLine == line) {
+                        offset = i
+                        break
+                    }
+                    if (text[i] == '\n') currentLine++
+                }
+                if (currentLine == line) offset = text.length
+                editText.setSelection(offset.coerceIn(0, text.length))
+            }
+            .setNegativeButton(getString(R.string.cancel)) { _, _ -> }
+            .show()
+    }
+
+    private fun showTemplatesDialog() {
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_templates, null)
+        dialog.setContentView(view)
+
+        val templatesList = view.findViewById<LinearLayout>(R.id.templates_list)
+        val btnCancel = view.findViewById<Button>(R.id.btnCancel)
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+
+        LatexTemplates.templates.forEachIndexed { index, template ->
+            val itemView = layoutInflater.inflate(R.layout.item_template, templatesList, false)
+            val templateName = itemView.findViewById<TextView>(R.id.template_name)
+            val templateDescription = itemView.findViewById<TextView>(R.id.template_description)
+
+            templateName.text = template.name
+            templateDescription.text = template.description
+
+            itemView.setOnClickListener {
+                dialog.dismiss()
+                createDocumentFromTemplate(template)
+            }
+
+            templatesList.addView(itemView)
+        }
+
+        dialog.show()
+    }
+
+    private fun createDocumentFromTemplate(template: LatexTemplates.Template) {
+        syncEditorToCurrentDoc()
+        untitledCounter++
+        val newDoc = LatexDocument(
+            content = template.content,
+            savedUri = null,
+            displayName = "${template.name} $untitledCounter",
+            isDirty = false
+        )
+        documents.add(newDoc)
+        currentDocIndex = documents.size - 1
+        loadCurrentDocIntoEditor()
+        refreshDocumentTabs()
+        Toast.makeText(this, "Created from ${template.name}", Toast.LENGTH_SHORT).show()
     }
 
     private fun openRecentUri(uriString: String) {
@@ -162,7 +605,7 @@ class MainActivity : AppCompatActivity() {
         try {
             contentResolver.openInputStream(uri)?.use { input ->
                 val content = input.bufferedReader().readText()
-                val name = uri.lastPathSegment?.substringAfterLast('/') ?: getString(R.string.untitled)
+                val name = getFileNameFromUri(uri)
                 val newDoc = LatexDocument(content, uri, name, false)
                 syncEditorToCurrentDoc()
                 documents.add(newDoc)
@@ -225,14 +668,56 @@ class MainActivity : AppCompatActivity() {
     private fun loadCurrentDocIntoEditor() {
         if (documents.isEmpty()) return
         val doc = documents.getOrNull(currentDocIndex) ?: return
+        undoStack.clear()
+        redoStack.clear()
         editText.setText(doc.content)
         LatexHighlighter.applyHighlighting(editText.text)
         updatePreviewFromLatex(doc.content)
     }
 
+    private fun pushUndoState(state: String) {
+        if (isUndoRedoAction) return
+        if (undoStack.isNotEmpty() && undoStack.last() == state) return
+        redoStack.clear()
+        undoStack.addLast(state)
+        while (undoStack.size > maxUndoSize) undoStack.removeFirst()
+    }
+
+    private fun performUndo() {
+        if (undoStack.isEmpty()) return
+        val current = editText.text.toString()
+        isUndoRedoAction = true
+        redoStack.addLast(current)
+        val prev = undoStack.removeLast()
+        editText.setText(prev)
+        editText.setSelection(prev.length)
+        documents.getOrNull(currentDocIndex)?.content = prev
+        documents.getOrNull(currentDocIndex)?.isDirty = true
+        LatexHighlighter.applyHighlighting(editText.text)
+        updatePreviewFromLatex(prev)
+        updateCurrentTabLabel()
+        isUndoRedoAction = false
+    }
+
+    private fun performRedo() {
+        if (redoStack.isEmpty()) return
+        val current = editText.text.toString()
+        isUndoRedoAction = true
+        undoStack.addLast(current)
+        val next = redoStack.removeLast()
+        editText.setText(next)
+        editText.setSelection(next.length)
+        documents.getOrNull(currentDocIndex)?.content = next
+        documents.getOrNull(currentDocIndex)?.isDirty = true
+        LatexHighlighter.applyHighlighting(editText.text)
+        updatePreviewFromLatex(next)
+        updateCurrentTabLabel()
+        isUndoRedoAction = false
+    }
+
     private fun togglePreview() {
         showPreview = !showPreview
-        editText.visibility = if (showPreview) View.GONE else View.VISIBLE
+        editorContainer.visibility = if (showPreview) View.GONE else View.VISIBLE
         webView.visibility = if (showPreview) View.VISIBLE else View.GONE
         btnPreview.text = if (showPreview) getString(R.string.editor) else getString(R.string.preview)
     }
@@ -242,12 +727,12 @@ class MainActivity : AppCompatActivity() {
         documents.forEachIndexed { index, doc ->
             val tab = tabs.newTab()
             tab.tag = index
-            tab.customView = makeDocTabView(doc.effectiveName(), index, withClose = true)
+            tab.customView = makeDocTabView(doc.effectiveName(), index, withClose = true, isDirty = doc.isDirty)
             tabs.addTab(tab)
         }
         val newTab = tabs.newTab()
         newTab.tag = -1
-        newTab.customView = makeDocTabView(getString(R.string.tab_new), -1, withClose = false)
+        newTab.customView = makeDocTabView(getString(R.string.tab_new), -1, withClose = false, isDirty = false)
         tabs.addTab(newTab)
 
         tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
@@ -283,43 +768,67 @@ class MainActivity : AppCompatActivity() {
             val name = doc.effectiveName() + if (doc.isDirty) " •" else ""
             val tab = tabs.newTab()
             tab.tag = index
-            tab.customView = makeDocTabView(name, index, withClose = true)
+            tab.customView = makeDocTabView(name, index, withClose = true, isDirty = doc.isDirty)
             tabs.addTab(tab)
         }
         val newTab = tabs.newTab()
         newTab.tag = -1
-        newTab.customView = makeDocTabView(getString(R.string.tab_new), -1, withClose = false)
+        newTab.customView = makeDocTabView(getString(R.string.tab_new), -1, withClose = false, isDirty = false)
         tabs.addTab(newTab)
         tabs.selectTab(tabs.getTabAt(currentDocIndex.coerceIn(0, documents.size)))
+        updateSaveStatusIcon()
     }
 
     private fun updateCurrentTabLabel() {
         val doc = documents.getOrNull(currentDocIndex) ?: return
         val tab = tabs.getTabAt(currentDocIndex) ?: return
         val name = doc.effectiveName() + if (doc.isDirty) " •" else ""
-        (tab.customView as? LinearLayout)?.getChildAt(0)?.let { child ->
-            (child as? TextView)?.text = name
+        (tab.customView as? LinearLayout)?.let { wrap ->
+            val titleIndex = if (wrap.childCount >= 3) 1 else 0
+            (wrap.getChildAt(titleIndex) as? TextView)?.text = name
+            if (wrap.childCount >= 3) {
+                wrap.getChildAt(0).visibility = if (doc.isDirty) View.VISIBLE else View.GONE
+            }
         }
+        updateSaveStatusIcon()
     }
 
-    private fun makeDocTabView(title: String, docIndex: Int, withClose: Boolean): View {
+    private fun makeDocTabView(title: String, docIndex: Int, withClose: Boolean, isDirty: Boolean = false): View {
         val wrap = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
+            setPadding(8, 8, 8, 8)
+            if (!withClose) contentDescription = getString(R.string.new_tab)
+        }
+        if (withClose) {
+            val dirtyDot = View(this).apply {
+                background = getDrawable(R.drawable.tab_dirty_dot)
+                layoutParams = LinearLayout.LayoutParams(12, 12).apply { marginEnd = 6 }
+                visibility = if (isDirty) View.VISIBLE else View.GONE
+            }
+            wrap.addView(dirtyDot)
         }
         val titleView = TextView(this).apply {
             text = title
             setPadding(0, 0, 12, 0)
+            textSize = 14f
         }
         wrap.addView(titleView)
         if (withClose) {
             val close = ImageButton(this).apply {
-                setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+                setImageResource(R.drawable.ic_close)
                 background = null
-                setPadding(4, 4, 4, 4)
+                setPadding(12, 12, 12, 12)
+                layoutParams = LinearLayout.LayoutParams(48, 48)
+                contentDescription = getString(R.string.close_tab)
                 setOnClickListener { tryCloseTab(docIndex) }
             }
             wrap.addView(close)
+
+            wrap.setOnLongClickListener {
+                Toast.makeText(this, getString(R.string.tab_reorder_hint), Toast.LENGTH_SHORT).show()
+                true
+            }
         }
         return wrap
     }
@@ -330,7 +839,7 @@ class MainActivity : AppCompatActivity() {
             closeTabAt(index)
             return
         }
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setTitle(getString(R.string.save))
             .setMessage(getString(R.string.close_tab_confirm, doc.effectiveName()))
             .setPositiveButton(getString(R.string.save)) { _, _ ->
@@ -368,7 +877,7 @@ class MainActivity : AppCompatActivity() {
             if (idx >= 0) {
                 documents[idx].content = content
                 documents[idx].isDirty = false
-                val name = uri.lastPathSegment?.substringAfterLast('/') ?: documents[idx].effectiveName()
+                val name = getFileNameFromUri(uri)
                 documents[idx].displayName = name
             }
         } catch (e: Exception) {
@@ -394,6 +903,7 @@ class MainActivity : AppCompatActivity() {
         if (doc.savedUri != null) {
             saveContentToUri(doc.content, doc.savedUri!!)
             refreshDocumentTabs()
+            updateSaveStatusIcon()
             Toast.makeText(this, getString(R.string.saved), Toast.LENGTH_SHORT).show()
         } else {
             pendingSaveThenCloseIndex = null
@@ -409,7 +919,7 @@ class MainActivity : AppCompatActivity() {
             } catch (_: SecurityException) { }
             contentResolver.openInputStream(uri)?.use { input ->
                 val content = input.bufferedReader().readText()
-                val name = uri.lastPathSegment?.substringAfterLast('/') ?: getString(R.string.untitled)
+                val name = getFileNameFromUri(uri)
                 RecentFilesPrefs.addRecent(this, uri.toString(), name)
                 val newDoc = LatexDocument(content, uri, name, false)
                 syncEditorToCurrentDoc()
@@ -421,6 +931,24 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Toast.makeText(this, e.message ?: "Open failed", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun getFileNameFromUri(uri: Uri): String {
+        // Try to get the display name from the content resolver first
+        contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val displayNameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (displayNameIndex >= 0) {
+                    val displayName = cursor.getString(displayNameIndex)
+                    if (!displayName.isNullOrEmpty()) {
+                        return displayName
+                    }
+                }
+            }
+        }
+        // Fallback to parsing the URI path
+        return uri.lastPathSegment?.substringAfterLast('/')?.substringAfterLast(':')
+            ?: getString(R.string.untitled)
     }
 
     private fun setupLivePreview() {
@@ -457,6 +985,15 @@ class MainActivity : AppCompatActivity() {
                     delay(150L)
                     LatexHighlighter.applyHighlighting(s)
                 }
+                // Debounced push to undo stack
+                if (!isUndoRedoAction) {
+                    undoPushJob?.cancel()
+                    undoPushJob = CoroutineScope(Dispatchers.Main).launch {
+                        delay(undoPushDelayMs)
+                        pushUndoState(rawLatex)
+                    }
+                }
+                lineNumberView.invalidate()
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -465,6 +1002,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun updatePreviewFromLatex(latexCode: String) {
         CoroutineScope(Dispatchers.Default).launch {
+            withContext(Dispatchers.Main) {
+                previewLoadingIndicator.visibility = if (showPreview) View.VISIBLE else View.GONE
+            }
             var wrapped = ""
             val html = try {
                 wrapped = if (latexCode.isBlank()) {
@@ -499,6 +1039,7 @@ class MainActivity : AppCompatActivity() {
                     "UTF-8",
                     null
                 )
+                previewLoadingIndicator.visibility = View.GONE
             }
         }
     }
