@@ -10,7 +10,7 @@ object RecentFilesPrefs {
     private const val KEY_RECENT = "recent_files"
     private const val MAX_RECENT = 10
 
-    data class Entry(val uri: String, val displayName: String)
+    data class Entry(val uri: String, val displayName: String, val lastOpenedAt: Long = 0L)
 
     fun getRecent(context: Context): List<Entry> {
         val json = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -19,7 +19,11 @@ object RecentFilesPrefs {
             val arr = JSONArray(json)
             (0 until arr.length()).map { i ->
                 val obj = arr.getJSONObject(i)
-                Entry(obj.getString("uri"), obj.optString("name", "?"))
+                Entry(
+                    obj.getString("uri"),
+                    obj.optString("name", "?"),
+                    obj.optLong("ts", 0L)
+                )
             }
         } catch (_: Exception) {
             emptyList()
@@ -28,13 +32,14 @@ object RecentFilesPrefs {
 
     fun addRecent(context: Context, uri: String, displayName: String) {
         val current = getRecent(context).toMutableList()
-        val newEntry = Entry(uri, displayName)
+        val now = System.currentTimeMillis()
+        val newEntry = Entry(uri, displayName, now)
         current.removeAll { it.uri == uri }
         current.add(0, newEntry)
         val trimmed = current.take(MAX_RECENT)
         val arr = JSONArray()
         trimmed.forEach { e ->
-            arr.put(JSONObject().put("uri", e.uri).put("name", e.displayName))
+            arr.put(JSONObject().put("uri", e.uri).put("name", e.displayName).put("ts", e.lastOpenedAt))
         }
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
             .edit()
@@ -47,7 +52,7 @@ object RecentFilesPrefs {
         current.removeAll { it.uri == uri }
         val arr = JSONArray()
         current.forEach { e ->
-            arr.put(JSONObject().put("uri", e.uri).put("name", e.displayName))
+            arr.put(JSONObject().put("uri", e.uri).put("name", e.displayName).put("ts", e.lastOpenedAt))
         }
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
             .edit()

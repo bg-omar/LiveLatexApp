@@ -20,6 +20,7 @@ object EditorPrefs {
     const val DEFAULT_SHOW_LINE_NUMBERS = false
 
     const val KEY_NIGHT_MODE = "night_mode"
+    const val KEY_SKIP_DISCARD_CONFIRM = "skip_discard_confirm"
 
     fun getEditorFontSizeSp(context: Context): Float {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -90,6 +91,18 @@ object EditorPrefs {
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
             .edit()
             .putInt(KEY_NIGHT_MODE, mode)
+            .apply()
+    }
+
+    fun getSkipDiscardConfirm(context: Context): Boolean {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .getBoolean(KEY_SKIP_DISCARD_CONFIRM, false)
+    }
+
+    fun setSkipDiscardConfirm(context: Context, skip: Boolean) {
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(KEY_SKIP_DISCARD_CONFIRM, skip)
             .apply()
     }
 }

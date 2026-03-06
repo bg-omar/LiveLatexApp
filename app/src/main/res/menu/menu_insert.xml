@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_insert_image"
+        android:icon="@drawable/ic_insert_image"
+        android:title="@string/insert_image"/>
+    <item
+        android:id="@+id/action_insert_tikz"
+        android:icon="@drawable/ic_insert_tikz"
+        android:title="@string/insert_tikz"/>
+    <item
+        android:id="@+id/action_insert_table"
+        android:icon="@drawable/ic_insert_table"
+        android:title="@string/insert_table"/>
+    <item
+        android:id="@+id/action_insert_list"
+        android:icon="@drawable/ic_insert_list"
+        android:title="@string/insert_list"/>
+</menu>

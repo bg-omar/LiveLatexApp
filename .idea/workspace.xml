@@ -66,69 +66,30 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b8480210-f6c6-4ea1-83d6-93e0c3da24ad" name="Changes" comment="Add initial XML configuration files for project setup">
-      <change afterPath="$PROJECT_DIR$/Suggestions.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LatexTemplates.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LineNumberView.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/CloudPrefs.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GitHubOAuthHelper.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GoogleDriveHelper.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlBlocks.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlParsing.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlProse.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlSanitizer.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlState.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlTemplate.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlUtils.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/bottom_sheet_drag_handle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_close.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_cloud.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_jump_to_line.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_line_numbers.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_open.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_pdf.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_redo.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_save.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_saved.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_search.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_template.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_undo.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_unsaved.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/tab_dirty_dot.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_find_replace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_jump_to_line.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_templates.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_recent_file.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_symbol_button.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_template.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/xml/file_paths.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/CLOUD_SETUP.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/DOCUMENT_MANAGEMENT_IMPROVEMENTS.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/FIX_CONFIRMATION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/IMPLEMENTATION_COMPLETE.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/LINT_DETAILED_RESOLUTION.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/LINT_ERROR_FIX.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/VISUAL_DIAGRAM.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/VISUAL_GUIDE_IMPROVEMENTS.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
+    <list default="true" id="b8480210-f6c6-4ea1-83d6-93e0c3da24ad" name="Changes" comment="Implement comprehensive document management features, cloud integrations, and UI/UX enhancements.&#10;&#10;### Core Features &amp; Enhancements&#10;*   **Document Management**:&#10;    *   Implement a **Templates Library** with 6 professional LaTeX templates (Article, Beamer, Report, etc.).&#10;    *   Fix tab title extraction using `ContentResolver` for accurate filenames across all URI types.&#10;    *   Add **Undo/Redo** functionality with a debounced state stack.&#10;    *   Implement **Find &amp; Replace** with match counting and navigation.&#10;    *   Add a **Symbol Toolbar** for quick insertion of LaTeX commands and special characters.&#10;    *   Implement **Auto-save** with configurable intervals and a **Line Number View**.&#10;&#10;### Cloud &amp; Connectivity&#10;*   **GitHub Integration**: Add OAuth2 flow for connecting accounts and storing encrypted access tokens.&#10;*   **Google Drive Integration**: Implement Google Sign-In with `drive.file` scope for cloud storage access.&#10;*   **Security**: Add `EncryptedSharedPreferences` via `CloudPrefs` for secure token storage.&#10;&#10;### UI/UX Improvements&#10;*   **Recent Files**: Overhaul the recent files list with a rich card-based UI showing file paths and &quot;remove&quot; functionality.&#10;*   **Tabs**: Enhance `TabLayout` with dirty state indicators (unsaved changes), improved touch targets, and a &quot;New Tab&quot; button.&#10;*   **Menu**: Redesign the bottom sheet menu with categorized sections (File, Edit, View, Editor, Cloud) and theme switching (Light/Dark/System).&#10;*   **Editor**: Add pinch-to-zoom support, document statistics (word/char count), and &quot;Jump to Line&quot; functionality.&#10;&#10;### Technical &amp; Configuration&#10;*   **Refactoring**: Modularize `LatexHtml` into multiple files (`LatexHtmlParsing`, `LatexHtmlBlocks`, `LatexHtmlUtils`, etc.) for better maintainability.&#10;*   **Build System**: Add `BuildConfig` fields for API client IDs and update dependencies for Play Services Auth, OkHttp, and Security Crypto.&#10;*   **Resources**: Add numerous vector drawables for UI actions and update Material 3 theme configurations.&#10;*   **Documentation**: Add extensive guides for cloud setup, lint fixes, and implementation summaries.">
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LatexSnippets.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_add.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_insert_image.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_insert_list.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_insert_table.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_insert_tikz.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_more_tabs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_more_tab.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/menu/menu_insert.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/build-output.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/docs/build.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/EditorPrefs.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/EditorPrefs.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/MainActivity.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/RecentFilesPrefs.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/RecentFilesPrefs.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtml.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtml.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/TikzRenderer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/TikzRenderer.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_menu.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values-night/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values-night/themes.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/dialog_templates.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_templates.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_recent_file.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_recent_file.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_template.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_template.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/themes.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -246,18 +207,18 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="SYNC" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "OmarIskandarani-KSO"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;OmarIskandarani-KSO&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/bg-omar/LiveLatexAndroid.git",
-    "accountId": "30d0aa0e-39f3-459a-9c53-aa1692da0f72"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/bg-omar/LiveLatexAndroid.git&quot;,
+    &quot;accountId&quot;: &quot;30d0aa0e-39f3-459a-9c53-aa1692da0f72&quot;
   }
-}]]></component>
+}</component>
   <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\workspace\Gradle\gradle-9.3.1" javaHome="C:\Users\Omar.Iskandarani\AppData\Local\Programs\Android Studio\jbr" gradleVersion="9.3.1">
     <option name="jvmArguments">
       <list>
@@ -278,46 +239,47 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Android App.app.executor": "Run",
-    "Gradle.Configure Daemon JVM Criteria.executor": "Run",
-    "Gradle.LiveLatexApp [build].executor": "Run",
-    "Gradle.LiveLatexApp [clean].executor": "Run",
-    "GradleDaemonJvmCriteriaMigrationNotification.isNotificationDisabled": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SONARLINT_PRECOMMIT_ANALYSIS": "false",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "com.google.services.firebase.aqiPopupShown": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/workspace/projects/LiveLatex/LiveLatexApp",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.Configure Daemon JVM Criteria.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LiveLatexApp [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LiveLatexApp [clean].executor&quot;: &quot;Run&quot;,
+    &quot;GradleDaemonJvmCriteriaMigrationNotification.isNotificationDisabled&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/workspace/projects/LiveLatex/LiveLatexApp&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\workspace\projects\LiveLatexApp\app\src\main" />
       <recent name="C:\workspace\projects\LiveLatexApp\app\src\main\res" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\workspace\solo_projects\LiveLatex\LiveLatexApp\docs" />
       <recent name="C:\workspace\projects\LiveLatexApp" />
     </key>
     <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
@@ -517,7 +479,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772529260108</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Implement comprehensive document management features, cloud integrations, and UI/UX enhancements.&#10;&#10;### Core Features &amp; Enhancements&#10;*   **Document Management**:&#10;    *   Implement a **Templates Library** with 6 professional LaTeX templates (Article, Beamer, Report, etc.).&#10;    *   Fix tab title extraction using `ContentResolver` for accurate filenames across all URI types.&#10;    *   Add **Undo/Redo** functionality with a debounced state stack.&#10;    *   Implement **Find &amp; Replace** with match counting and navigation.&#10;    *   Add a **Symbol Toolbar** for quick insertion of LaTeX commands and special characters.&#10;    *   Implement **Auto-save** with configurable intervals and a **Line Number View**.&#10;&#10;### Cloud &amp; Connectivity&#10;*   **GitHub Integration**: Add OAuth2 flow for connecting accounts and storing encrypted access tokens.&#10;*   **Google Drive Integration**: Implement Google Sign-In with `drive.file` scope for cloud storage access.&#10;*   **Security**: Add `EncryptedSharedPreferences` via `CloudPrefs` for secure token storage.&#10;&#10;### UI/UX Improvements&#10;*   **Recent Files**: Overhaul the recent files list with a rich card-based UI showing file paths and &quot;remove&quot; functionality.&#10;*   **Tabs**: Enhance `TabLayout` with dirty state indicators (unsaved changes), improved touch targets, and a &quot;New Tab&quot; button.&#10;*   **Menu**: Redesign the bottom sheet menu with categorized sections (File, Edit, View, Editor, Cloud) and theme switching (Light/Dark/System).&#10;*   **Editor**: Add pinch-to-zoom support, document statistics (word/char count), and &quot;Jump to Line&quot; functionality.&#10;&#10;### Technical &amp; Configuration&#10;*   **Refactoring**: Modularize `LatexHtml` into multiple files (`LatexHtmlParsing`, `LatexHtmlBlocks`, `LatexHtmlUtils`, etc.) for better maintainability.&#10;*   **Build System**: Add `BuildConfig` fields for API client IDs and update dependencies for Play Services Auth, OkHttp, and Security Crypto.&#10;*   **Resources**: Add numerous vector drawables for UI actions and update Material 3 theme configurations.&#10;*   **Documentation**: Add extensive guides for cloud setup, lint fixes, and implementation summaries.">
+      <option name="closed" value="true" />
+      <created>1772800047292</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1772800047293</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -552,7 +522,8 @@
     <MESSAGE value="Add initial project structure and configuration files for LiveLatexApp" />
     <MESSAGE value="Fix: Add comprehensive SSL/TLS error handling and documentation&#10;&#10;This commit resolves persistent &quot;unable to find valid certification path&quot; errors during Gradle sync and within the application's WebView.&#10;&#10;Key changes:&#10;-   **Gradle SSL Fix**:&#10;    -   Upgrades Gradle Wrapper to 9.2.1.&#10;    -   Modifies `MainActivity.kt` to add an `onReceivedSslError` handler in the `WebViewClient`, allowing resources from CDNs like MathJax to load correctly.&#10;    -   Enables core library desugaring to support `java.time` APIs.&#10;-   **Troubleshooting Documentation and Scripts**:&#10;    -   Introduces extensive documentation (`START_HERE.md`, `GRADLE_SSL_TROUBLESHOOTING.md`, etc.) to guide users through fixing SSL issues.&#10;    -   Adds helper scripts (`fix-gradle-ssl.bat`, `fix-gradle-ssl.ps1`) to automate cleanup and diagnostics, such as clearing the Gradle cache and checking network connectivity.&#10;-   **Code Refinements**:&#10;    -   Replaces special character symbols with their Unicode equivalents in `LatexHtml.kt` for better rendering.&#10;-   **Assets**:&#10;    -   Adds new logo and icon assets for the project." />
     <MESSAGE value="Add initial XML configuration files for project setup" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add initial XML configuration files for project setup" />
+    <MESSAGE value="Implement comprehensive document management features, cloud integrations, and UI/UX enhancements.&#10;&#10;### Core Features &amp; Enhancements&#10;*   **Document Management**:&#10;    *   Implement a **Templates Library** with 6 professional LaTeX templates (Article, Beamer, Report, etc.).&#10;    *   Fix tab title extraction using `ContentResolver` for accurate filenames across all URI types.&#10;    *   Add **Undo/Redo** functionality with a debounced state stack.&#10;    *   Implement **Find &amp; Replace** with match counting and navigation.&#10;    *   Add a **Symbol Toolbar** for quick insertion of LaTeX commands and special characters.&#10;    *   Implement **Auto-save** with configurable intervals and a **Line Number View**.&#10;&#10;### Cloud &amp; Connectivity&#10;*   **GitHub Integration**: Add OAuth2 flow for connecting accounts and storing encrypted access tokens.&#10;*   **Google Drive Integration**: Implement Google Sign-In with `drive.file` scope for cloud storage access.&#10;*   **Security**: Add `EncryptedSharedPreferences` via `CloudPrefs` for secure token storage.&#10;&#10;### UI/UX Improvements&#10;*   **Recent Files**: Overhaul the recent files list with a rich card-based UI showing file paths and &quot;remove&quot; functionality.&#10;*   **Tabs**: Enhance `TabLayout` with dirty state indicators (unsaved changes), improved touch targets, and a &quot;New Tab&quot; button.&#10;*   **Menu**: Redesign the bottom sheet menu with categorized sections (File, Edit, View, Editor, Cloud) and theme switching (Light/Dark/System).&#10;*   **Editor**: Add pinch-to-zoom support, document statistics (word/char count), and &quot;Jump to Line&quot; functionality.&#10;&#10;### Technical &amp; Configuration&#10;*   **Refactoring**: Modularize `LatexHtml` into multiple files (`LatexHtmlParsing`, `LatexHtmlBlocks`, `LatexHtmlUtils`, etc.) for better maintainability.&#10;*   **Build System**: Add `BuildConfig` fields for API client IDs and update dependencies for Play Services Auth, OkHttp, and Security Crypto.&#10;*   **Resources**: Add numerous vector drawables for UI actions and update Material 3 theme configurations.&#10;*   **Documentation**: Add extensive guides for cloud setup, lint fixes, and implementation summaries." />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement comprehensive document management features, cloud integrations, and UI/UX enhancements.&#10;&#10;### Core Features &amp; Enhancements&#10;*   **Document Management**:&#10;    *   Implement a **Templates Library** with 6 professional LaTeX templates (Article, Beamer, Report, etc.).&#10;    *   Fix tab title extraction using `ContentResolver` for accurate filenames across all URI types.&#10;    *   Add **Undo/Redo** functionality with a debounced state stack.&#10;    *   Implement **Find &amp; Replace** with match counting and navigation.&#10;    *   Add a **Symbol Toolbar** for quick insertion of LaTeX commands and special characters.&#10;    *   Implement **Auto-save** with configurable intervals and a **Line Number View**.&#10;&#10;### Cloud &amp; Connectivity&#10;*   **GitHub Integration**: Add OAuth2 flow for connecting accounts and storing encrypted access tokens.&#10;*   **Google Drive Integration**: Implement Google Sign-In with `drive.file` scope for cloud storage access.&#10;*   **Security**: Add `EncryptedSharedPreferences` via `CloudPrefs` for secure token storage.&#10;&#10;### UI/UX Improvements&#10;*   **Recent Files**: Overhaul the recent files list with a rich card-based UI showing file paths and &quot;remove&quot; functionality.&#10;*   **Tabs**: Enhance `TabLayout` with dirty state indicators (unsaved changes), improved touch targets, and a &quot;New Tab&quot; button.&#10;*   **Menu**: Redesign the bottom sheet menu with categorized sections (File, Edit, View, Editor, Cloud) and theme switching (Light/Dark/System).&#10;*   **Editor**: Add pinch-to-zoom support, document statistics (word/char count), and &quot;Jump to Line&quot; functionality.&#10;&#10;### Technical &amp; Configuration&#10;*   **Refactoring**: Modularize `LatexHtml` into multiple files (`LatexHtmlParsing`, `LatexHtmlBlocks`, `LatexHtmlUtils`, etc.) for better maintainability.&#10;*   **Build System**: Add `BuildConfig` fields for API client IDs and update dependencies for Play Services Auth, OkHttp, and Security Crypto.&#10;*   **Resources**: Add numerous vector drawables for UI actions and update Material 3 theme configurations.&#10;*   **Documentation**: Add extensive guides for cloud setup, lint fixes, and implementation summaries." />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>

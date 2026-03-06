@@ -53,7 +53,7 @@
             android:gravity="top|start"
             android:fontFamily="monospace"
             android:textSize="14sp"
-            android:hint="Type LaTeX here... \nExample:\n\\usepackage{physics}\n\\begin{document}\n$\\ket{\\psi}$\n\\end{document}"/>
+            android:hint="@string/editor_hint"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -78,6 +78,57 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/previewToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:background="#E0000000"
+            android:visibility="gone">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPreviewRefresh"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/preview_refresh"
+                android:textColor="@color/white"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPreviewCopy"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/preview_copy"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/previewErrorBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="@color/error_red"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="4dp">
+
+            <TextView
+                android:id="@+id/previewErrorBannerText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:text="@string/preview_error_banner_no_line"/>
+        </com.google.android.material.card.MaterialCardView>
     </FrameLayout>
 
     <!-- Bottom bar: follows light/dark mode, teal accent -->
@@ -135,6 +186,17 @@
             android:layout_weight="1"
             app:tabMode="scrollable"
             app:tabGravity="fill"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnInsertAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="@string/insert_add_button"
+            app:srcCompat="@drawable/ic_add"
+            app:fabSize="mini"
+            app:tint="?attr/colorOnPrimary"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPreview"

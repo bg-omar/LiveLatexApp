@@ -43,17 +43,29 @@
             android:layout_marginTop="2dp"
             android:text="/path/to/file"/>
 
+        <TextView
+            android:id="@+id/file_last_opened"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="11sp"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:visibility="gone"
+            android:text=""/>
+
     </LinearLayout>
 
     <ImageButton
         android:id="@+id/btn_remove"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginStart="8dp"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:contentDescription="@string/remove_from_recent"
-        android:padding="4dp"/>
+        android:padding="12dp"/>
 
 </LinearLayout>
 
