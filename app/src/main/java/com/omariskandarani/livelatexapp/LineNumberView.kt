@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.widget.EditText
+import android.widget.ScrollView
 
 /**
  * A view that draws line numbers for the given EditText. Sync with the editor by calling
@@ -39,17 +40,29 @@ class LineNumberView @JvmOverloads constructor(
         val editor = editText ?: return
         val lineCount = editor.lineCount.coerceAtLeast(1)
         val lineHeight = editor.lineHeight
-        val scrollY = editor.scrollY
         val paddingTop = editor.paddingTop
-        val firstVisible = (scrollY / lineHeight).toInt().coerceIn(0, lineCount - 1)
-        val lastVisible = ((scrollY + height) / lineHeight).toInt().coerceIn(0, lineCount - 1)
         val descent = paint.descent()
-        for (i in firstVisible..lastVisible) {
-            val lineNum = i + 1
-            val y = paddingTop + (i + 1) * lineHeight - descent - scrollY
-            val text = lineNum.toString()
-            val x = width - paint.measureText(text) - 8f
-            canvas.drawText(text, x, y, paint)
+        val parent = editor.parent
+        if (parent is ScrollView) {
+            // LineNumberView and EditText are siblings inside ScrollView: draw all lines at fixed positions; they scroll together
+            for (i in 0 until lineCount) {
+                val lineNum = i + 1
+                val y = paddingTop + (i + 1) * lineHeight - descent
+                val text = lineNum.toString()
+                val x = width - paint.measureText(text) - 8f
+                canvas.drawText(text, x, y, paint)
+            }
+        } else {
+            val scrollY = editor.scrollY
+            val firstVisible = (scrollY / lineHeight).toInt().coerceIn(0, lineCount - 1)
+            val lastVisible = ((scrollY + height) / lineHeight).toInt().coerceIn(0, lineCount - 1)
+            for (i in firstVisible..lastVisible) {
+                val lineNum = i + 1
+                val y = paddingTop + (i + 1) * lineHeight - descent - scrollY
+                val text = lineNum.toString()
+                val x = width - paint.measureText(text) - 8f
+                canvas.drawText(text, x, y, paint)
+            }
         }
     }
 }

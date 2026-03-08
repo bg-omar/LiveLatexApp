@@ -2,11 +2,41 @@ package com.omariskandarani.livelatexapp
 
 object LatexTemplates {
 
+    /** Placeholders replaced when creating from template: {{AUTHOR}}, {{AFFILIATE}}, {{ADDRESS}}, {{EMAIL}}, {{ORCID}}, {{TITLE}}, {{SUBJECT}}, {{CONTENT}}. */
+    private const val P_AUTHOR = "{{AUTHOR}}"
+    private const val P_AFFILIATE = "{{AFFILIATE}}"
+    private const val P_ADDRESS = "{{ADDRESS}}"
+    private const val P_EMAIL = "{{EMAIL}}"
+    private const val P_ORCID = "{{ORCID}}"
+    private const val P_TITLE = "{{TITLE}}"
+    private const val P_SUBJECT = "{{SUBJECT}}"
+    private const val P_CONTENT = "{{CONTENT}}"
+
     data class Template(
         val name: String,
         val description: String,
         val content: String
     )
+
+    /** Replaces template placeholders with values from defaults (and optional letter fields). Leaves placeholder if value blank. */
+    fun applyDefaults(
+        content: String,
+        defaults: TemplateDefaultsPrefs.TemplateDefaults,
+        title: String = "",
+        subject: String = "",
+        letterContent: String = ""
+    ): String {
+        var out = content
+        out = out.replace(P_AUTHOR, defaults.author)
+        out = out.replace(P_AFFILIATE, defaults.affiliate)
+        out = out.replace(P_ADDRESS, defaults.address)
+        out = out.replace(P_EMAIL, defaults.email)
+        out = out.replace(P_ORCID, defaults.orcid)
+        out = out.replace(P_TITLE, title)
+        out = out.replace(P_SUBJECT, subject)
+        out = out.replace(P_CONTENT, letterContent)
+        return out
+    }
 
     val templates = listOf(
         Template(
@@ -17,7 +47,7 @@ object LatexTemplates {
 \usepackage[utf8]{inputenc}
 
 \title{Untitled}
-\author{}
+\author{$P_AUTHOR}
 \date{\today}
 
 \begin{document}
@@ -42,7 +72,7 @@ Your content here.
 \usepackage{physics}
 
 \title{Mathematical Document}
-\author{}
+\author{$P_AUTHOR}
 \date{\today}
 
 \begin{document}
@@ -74,7 +104,7 @@ ${'$'}${'$'}\ket{\psi} = \alpha\ket{0} + \beta\ket{1}${'$'}${'$'}
 \usecolortheme{default}
 
 \title{Presentation Title}
-\author{Your Name}
+\author{$P_AUTHOR}
 \date{\today}
 
 \begin{document}
@@ -116,7 +146,7 @@ Some content here.
 \usepackage{hyperref}
 
 \title{Report Title}
-\author{Your Name}
+\author{$P_AUTHOR}
 \date{\today}
 
 \begin{document}
@@ -147,26 +177,40 @@ Summary and conclusions.
         ),
 
         Template(
-            name = "Letter",
-            description = "Formal letter template",
+            name = "Cover letter (journal)",
+            description = "Submission cover letter with TITLE, SUBJECT, CONTENT placeholders",
             content = """
-\documentclass{letter}
-\usepackage[utf8]{inputenc}
+\documentclass[a4paper,10pt]{letter}
 
-\signature{Your Name}
-\address{Your Address \\ City, State ZIP}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\usepackage[margin=1in]{geometry}
+
+% Sender info (from template defaults: author, affiliate, address, email, orcid)
+\signature{$P_AUTHOR\\
+$P_AFFILIATE\\
+ORCID: $P_ORCID\\
+Email: \href{mailto:$P_EMAIL}{$P_EMAIL}}
+
+\address{$P_AUTHOR\\
+$P_ADDRESS}
+
+\date{\today}
 
 \begin{document}
 
-\begin{letter}{Recipient Name \\ Recipient Address \\ City, State ZIP}
+    \begin{letter}{$P_SUBJECT}
 
-\opening{Dear Sir or Madam,}
+        \opening{Dear Editors,}
 
-This is the body of the letter.
+        $P_CONTENT
 
-\closing{Sincerely,}
+        \closing{Sincerely,}
 
-\end{letter}
+    \end{letter}
 
 \end{document}
             """.trimIndent()
@@ -183,7 +227,7 @@ This is the body of the letter.
 \usepackage{enumitem}
 
 \title{Homework Assignment}
-\author{Your Name}
+\author{$P_AUTHOR}
 \date{\today}
 
 \begin{document}

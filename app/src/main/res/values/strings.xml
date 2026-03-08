@@ -19,9 +19,12 @@
     <string name="editor_hint">Type LaTeX here…</string>
     <string name="close_tab_confirm">Save changes to \"%1$s\" before closing?</string>
     <string name="saved">Saved</string>
+    <string name="unsaved_changes">Unsaved changes</string>
+    <string name="save_hint_menu">Open menu and choose Save to save</string>
     <string name="preview">Preview</string>
     <string name="editor">Editor</string>
     <string name="menu">Menu</string>
+    <string name="documents">Documents</string>
     <string name="recent_files">Recent files</string>
     <string name="templates">Templates</string>
     <string name="new_from_template">New from template</string>
@@ -55,7 +58,6 @@
     <string name="section_view">View</string>
     <string name="section_editor">Editor</string>
     <string name="clear_recent">Clear recent files</string>
-    <string name="unsaved_changes">Unsaved changes</string>
     <string name="find_match_count">Match %1$d of %2$d</string>
     <string name="theme_appearance">Appearance</string>
     <string name="theme_light">Light</string>
@@ -81,8 +83,8 @@
     <string name="insert_add_button">Insert: add image, TikZ, table, or list</string>
     <string name="insert_list_dialog_hint">Enter one list item per line</string>
     <string name="insert_table_dialog_hint">One row per line; cells separated by comma or tab</string>
-    <string name="preview_error_banner">Preview error (line %1$d). Tap to go to line.</string>
-    <string name="preview_error_banner_no_line">Preview error. Tap to open editor.</string>
+    <string name="preview_error_banner">Preview error (line %1$d): %2$s Tap to go to line.</string>
+    <string name="preview_error_banner_no_line">Preview error: %1$s Tap to open editor.</string>
     <string name="last_opened">Last opened: %1$s</string>
     <string name="tab_document_desc">%1$s, %2$s</string>
     <string name="more_tabs">More (%1$d)</string>
@@ -93,4 +95,15 @@
     <string name="options">Options</string>
     <string name="new_doc">New</string>
     <string name="export_pdf_short">PDF</string>
+    <string name="symbols_toggle">Leestekens</string>
+    <string name="template_defaults">Template defaults</string>
+    <string name="template_defaults_summary">Author, address, email, ORCID for new documents</string>
+    <string name="edit_template_defaults">Edit author / address</string>
+    <string name="template_defaults_dialog_title">Template defaults</string>
+    <string name="template_author">Author name</string>
+    <string name="template_affiliate">Affiliation</string>
+    <string name="template_address">Address (use \\\\ for new line in LaTeX)</string>
+    <string name="template_email">Email</string>
+    <string name="template_orcid">ORCID</string>
+    <string name="error">Error</string>
 </resources>

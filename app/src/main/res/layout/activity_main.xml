@@ -1,211 +1,261 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
-    <!-- Editor and preview: full screen, paddingBottom for bottom bar -->
-    <LinearLayout
-        android:id="@+id/editorContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingBottom="72dp"
-        android:background="?attr/colorSurface">
-
-        <HorizontalScrollView
-            android:id="@+id/symbolToolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="none"
-            android:paddingVertical="4dp"
-            android:background="?attr/colorSurfaceVariant">
-
-            <LinearLayout
-                android:id="@+id/symbolToolbarButtons"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"/>
-        </HorizontalScrollView>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-        <com.omariskandarani.livelatexapp.LineNumberView
-            android:id="@+id/lineNumbers"
-            android:layout_width="32dp"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            android:background="?attr/colorSurfaceVariant"/>
-
-        <EditText
-            android:id="@+id/inputLatex"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="16dp"
-            android:gravity="top|start"
-            android:fontFamily="monospace"
-            android:textSize="14sp"
-            android:hint="@string/editor_hint"/>
-        </LinearLayout>
-    </LinearLayout>
-
+    <!-- Main content -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="top">
+        android:layout_height="match_parent">
 
-        <WebView
-            android:id="@+id/webviewPreview"
+        <!-- Editor and preview: full screen, paddingBottom for bottom bar -->
+        <LinearLayout
+            android:id="@+id/editorContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:orientation="vertical"
             android:paddingBottom="72dp"
-            android:paddingTop="16dp"
-            android:visibility="gone"/>
+            android:background="?attr/colorSurface">
 
-        <ProgressBar
-            android:id="@+id/previewLoadingIndicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone"/>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
 
-        <LinearLayout
-            android:id="@+id/previewToolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:orientation="horizontal"
-            android:padding="8dp"
-            android:background="#E0000000"
-            android:visibility="gone">
+                <ScrollView
+                    android:id="@+id/editorScrollView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fillViewport="true"
+                    android:overScrollMode="always"
+                    android:scrollbars="vertical">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPreviewRefresh"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/preview_refresh"
-                android:textColor="@color/white"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPreviewCopy"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/preview_copy"
-                android:textColor="@color/white"/>
+                        <com.omariskandarani.livelatexapp.LineNumberView
+                            android:id="@+id/lineNumbers"
+                            android:layout_width="32dp"
+                            android:layout_height="match_parent"
+                            android:visibility="gone"
+                            android:background="?attr/colorSurfaceVariant"/>
+
+                        <EditText
+                            android:id="@+id/inputLatex"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:minWidth="0dp"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:paddingTop="16dp"
+                            android:gravity="top|start"
+                            android:fontFamily="monospace"
+                            android:textSize="14sp"
+                            android:hint="@string/editor_hint"
+                            android:inputType="textMultiLine|textNoSuggestions"/>
+                    </LinearLayout>
+                </ScrollView>
+
+                <com.omariskandarani.livelatexapp.VerticalScrollBar
+                    android:id="@+id/editorScrollBar"
+                    android:layout_width="12dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="4dp"/>
+            </FrameLayout>
         </LinearLayout>
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/previewErrorBanner"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:visibility="gone"
-            android:clickable="true"
-            android:focusable="true"
-            app:cardBackgroundColor="@color/error_red"
-            app:cardCornerRadius="0dp"
-            app:cardElevation="4dp">
+            android:layout_height="match_parent"
+            android:layout_gravity="top">
 
-            <TextView
-                android:id="@+id/previewErrorBannerText"
+            <WebView
+                android:id="@+id/webviewPreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="72dp"
+                android:paddingTop="16dp"
+                android:visibility="gone"/>
+
+            <ProgressBar
+                android:id="@+id/previewLoadingIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/previewToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:textSize="14sp"
-                android:textColor="@color/white"
-                android:text="@string/preview_error_banner_no_line"/>
-        </com.google.android.material.card.MaterialCardView>
-    </FrameLayout>
+                android:layout_gravity="bottom"
+                android:orientation="horizontal"
+                android:padding="8dp"
+                android:background="#E0000000"
+                android:visibility="gone">
 
-    <!-- Bottom bar: follows light/dark mode, teal accent -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="?attr/colorSurface"
-        android:elevation="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPreviewRefresh"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/preview_refresh"
+                    android:textColor="@color/white"/>
 
-        <ImageButton
-            android:id="@+id/btnMenu"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/menu"
-            android:src="@drawable/ic_menu_hamburger"
-            android:scaleType="centerInside"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPreviewCopy"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/preview_copy"
+                    android:textColor="@color/white"/>
+            </LinearLayout>
 
-        <ImageView
-            android:id="@+id/saveStatusIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:contentDescription="@string/saved"
-            android:src="@drawable/ic_saved"/>
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/previewErrorBanner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/error_red"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="4dp">
 
-        <ImageButton
-            android:id="@+id/btnUndo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/undo"
-            android:src="@drawable/ic_undo"
-            android:scaleType="centerInside"/>
+                <TextView
+                    android:id="@+id/previewErrorBannerText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:text="@string/preview_error_banner_no_line"/>
+            </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
 
-        <ImageButton
-            android:id="@+id/btnRedo"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/redo"
-            android:src="@drawable/ic_redo"
-            android:scaleType="centerInside"/>
-
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabs"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            app:tabMode="scrollable"
-            app:tabGravity="fill"/>
-
+        <!-- Right side: Insert (+) button visible in editor, hidden in preview -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnInsertAdd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="4dp"
+            android:layout_gravity="end|top"
+            android:layout_margin="8dp"
+            android:layout_marginTop="72dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="visible"
             android:contentDescription="@string/insert_add_button"
             app:srcCompat="@drawable/ic_add"
             app:fabSize="mini"
             app:tint="?attr/colorOnPrimary"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPreview"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="8dp"
-            android:minWidth="88dp"
-            android:text="@string/preview"/>
+        <!-- Bottom bar: no tabs (tabs are in left fly-in) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="?attr/colorSurface"
+            android:elevation="8dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/menu"
+                android:src="@drawable/ic_menu_hamburger"
+                android:scaleType="centerInside"/>
+
+            <ImageView
+                android:id="@+id/saveStatusIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="@string/saved"
+                android:src="@drawable/ic_saved"/>
+
+            <ImageButton
+                android:id="@+id/btnUndo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/undo"
+                android:src="@drawable/ic_undo"
+                android:scaleType="centerInside"/>
+
+            <ImageButton
+                android:id="@+id/btnRedo"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/redo"
+                android:src="@drawable/ic_redo"
+                android:scaleType="centerInside"/>
+
+            <ImageButton
+                android:id="@+id/btnFindReplace"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/find_and_replace"
+                android:src="@drawable/ic_search"
+                android:scaleType="centerInside"/>
+
+            <ImageButton
+                android:id="@+id/btnJumpToLine"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/jump_to_line"
+                android:src="@drawable/ic_jump_to_line"
+                android:scaleType="centerInside"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPreview"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="8dp"
+                android:minWidth="88dp"
+                android:text="@string/preview"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Left fly-in: menu + tabs -->
+    <LinearLayout
+        android:id="@+id/drawerMenu"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:background="?attr/colorSurface"
+        android:fitsSystemWindows="true">
+
+        <include
+            layout="@layout/flyin_menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     </LinearLayout>
-</FrameLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

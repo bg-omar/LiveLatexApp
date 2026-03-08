@@ -3,6 +3,7 @@ package com.omariskandarani.livelatexapp.cloud
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
+import com.omariskandarani.livelatexapp.ErrorDialog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -35,7 +36,7 @@ object GoogleDriveHelper {
         val account = try {
             task.getResult(com.google.android.gms.common.api.ApiException::class.java)
         } catch (e: Exception) {
-            Toast.makeText(context, "Google sign-in failed: ${e.message}", Toast.LENGTH_LONG).show()
+            ErrorDialog.show(context, "Google sign-in failed: ${e.message ?: "Unknown error"}")
             return false
         }
         account?.email?.let { email ->

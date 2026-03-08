@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.print.PrintAttributes
 import android.print.PrintManager
+import android.provider.DocumentsContract
 import android.net.http.SslError
 import android.os.Bundle
 import android.text.Editable
@@ -26,16 +27,14 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import android.widget.Toast
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.tabs.TabLayout
 import com.omariskandarani.livelatexapp.BuildConfig
 import com.omariskandarani.livelatexapp.R
 import com.omariskandarani.livelatexapp.cloud.CloudPrefs
@@ -67,9 +66,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editorContainer: View
     private lateinit var lineNumberView: com.omariskandarani.livelatexapp.LineNumberView
     private lateinit var btnMenu: ImageButton
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var drawerMenu: View
     private lateinit var btnPreview: Button
     private lateinit var saveStatusIcon: ImageView
-    private lateinit var tabs: TabLayout
+    private lateinit var documentTabsContainer: LinearLayout
     private var previewJob: Job? = null
     private var highlightJob: Job? = null
     private var autoSaveJob: Job? = null
@@ -127,6 +128,13 @@ class MainActivity : AppCompatActivity() {
         private val INDEX_PATTERN = Pattern.compile("(?:at|near)?\\s*index\\s+(\\d+)", Pattern.CASE_INSENSITIVE)
         private const val MORE_TABS_THRESHOLD = 5
         private const val MORE_TAB_TAG = -2
+        private const val SYMBOL_MENU_ID_FIRST = 2000
+        private val INSERT_SYMBOLS = listOf(
+            "$" to "$", "\\" to "\\", "{" to "{", "}" to "}", "[" to "[", "]" to "]",
+            "^" to "^", "_" to "_",
+            "\\frac{}{}" to "\\frac{}{}", "\\begin{}…" to "\\begin{}\n\n\\end{}",
+            "\\alpha" to "\\alpha", "\\beta" to "\\beta", "\\sum" to "\\sum", "\\int" to "\\int", "\\sqrt{}" to "\\sqrt{}"
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -160,17 +168,35 @@ class MainActivity : AppCompatActivity() {
         editText = findViewById(R.id.inputLatex)
         lineNumberView = findViewById(R.id.lineNumbers)
         btnMenu = findViewById(R.id.btnMenu)
+        drawerLayout = findViewById(R.id.drawerLayout)
+        drawerMenu = findViewById(R.id.drawerMenu)
         btnPreview = findViewById(R.id.btnPreview)
-        tabs = findViewById(R.id.tabs)
+        documentTabsContainer = findViewById(R.id.documentTabsContainer)
         saveStatusIcon = findViewById(R.id.saveStatusIcon)
+        saveStatusIcon.setOnClickListener {
+            val doc = documents.getOrNull(currentDocIndex)
+            val isDirty = doc?.isDirty == true
+            Toast.makeText(
+                this,
+                if (isDirty) getString(R.string.unsaved_changes) + ". " + getString(R.string.save_hint_menu) else getString(R.string.saved),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
         val btnUndo = findViewById<ImageButton>(R.id.btnUndo)
         val btnRedo = findViewById<ImageButton>(R.id.btnRedo)
 
-        btnMenu.setOnClickListener { showMenuSheet() }
+        btnMenu.setOnClickListener { drawerLayout.openDrawer(drawerMenu) }
+        setupDrawerMenuListeners()
         btnPreview.setOnClickListener { togglePreview() }
         btnPreview.contentDescription = getString(R.string.preview)
         btnUndo.setOnClickListener { performUndo() }
         btnRedo.setOnClickListener { performRedo() }
+        val btnFindReplace = findViewById<ImageButton>(R.id.btnFindReplace)
+        val btnJumpToLine = findViewById<ImageButton>(R.id.btnJumpToLine)
+        btnFindReplace.contentDescription = getString(R.string.find_and_replace)
+        btnJumpToLine.contentDescription = getString(R.string.jump_to_line)
+        btnFindReplace.setOnClickListener { showFindReplaceDialog() }
+        btnJumpToLine.setOnClickListener { showJumpToLineDialog() }
         val btnInsertAdd = findViewById<com.google.android.material.floatingactionbutton.FloatingActionButton>(R.id.btnInsertAdd)
         btnInsertAdd.contentDescription = getString(R.string.insert_add_button)
         btnInsertAdd.setOnClickListener { showInsertPopupMenu(it) }
@@ -185,11 +211,11 @@ class MainActivity : AppCompatActivity() {
         setupLivePreview()
         setupAutoSave()
         setupLineNumbers()
-        setupSymbolToolbar()
         loadCurrentDocIntoEditor()
         updateSaveStatusIcon()
         showTemplatesOnFirstLaunch()
         handleGitHubOAuthCallback(intent)
+        handleOpenFileIntent(intent)
     }
 
     private fun updateSaveStatusIcon() {
@@ -210,6 +236,22 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         handleGitHubOAuthCallback(intent)
+        handleOpenFileIntent(intent)
+    }
+
+    /** When app is opened via "Open with" for a .tex file, open that file. */
+    private fun handleOpenFileIntent(intent: Intent?) {
+        if (intent?.action != Intent.ACTION_VIEW) return
+        val uri = intent.data ?: return
+        if (uri.scheme == "livelatex") return
+        if (uri.scheme != "content" && uri.scheme != "file") return
+        // For file:// require .tex in path; for content:// we were chosen to open this file (intent filter matched)
+        if (uri.scheme == "file") {
+            val path = uri.lastPathSegment ?: ""
+            if (!path.endsWith(".tex", ignoreCase = true)) return
+        }
+        openUri(uri)
+        intent.setData(null)
     }
 
     private fun handleGitHubOAuthCallback(intent: Intent?) {
@@ -222,21 +264,6 @@ class MainActivity : AppCompatActivity() {
                 BuildConfig.GITHUB_CLIENT_ID,
                 BuildConfig.GITHUB_CLIENT_SECRET.ifBlank { null }
             )
-        }
-    }
-
-    private fun setupSymbolToolbar() {
-        val container = findViewById<LinearLayout>(R.id.symbolToolbarButtons)
-        val symbols = listOf(
-            "$", "\\", "{", "}", "[", "]", "^", "_",
-            "\\frac{}{}", "\\begin{}\n\n\\end{}", "\\alpha", "\\beta", "\\sum", "\\int", "\\sqrt{}"
-        )
-        for (sym in symbols) {
-            val itemView = layoutInflater.inflate(R.layout.item_symbol_button, container, false)
-            val btn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.symbolButton)
-            btn.text = sym.take(8).let { if (sym.length > 8) "$it…" else it }
-            btn.setOnClickListener { insertAtCursor(sym) }
-            container.addView(itemView)
         }
     }
 
@@ -253,7 +280,43 @@ class MainActivity : AppCompatActivity() {
     private fun setupLineNumbers() {
         lineNumberView.setEditText(editText)
         lineNumberView.visibility = if (EditorPrefs.getShowLineNumbers(this)) View.VISIBLE else View.GONE
-        editText.setOnScrollChangeListener { _, _, _, _, _ -> lineNumberView.invalidate() }
+        val editorScrollView = findViewById<android.widget.ScrollView>(R.id.editorScrollView)
+        val editorScrollBar = findViewById<VerticalScrollBar>(R.id.editorScrollBar)
+        editorScrollView?.setOnScrollChangeListener { v, _, scrollY, _, _ ->
+            lineNumberView.invalidate()
+            val contentHeight = (v as? android.widget.ScrollView)?.getChildAt(0)?.height ?: 0
+            val viewportHeight = v.height
+            val maxScroll = (contentHeight - viewportHeight).coerceAtLeast(0)
+            if (maxScroll > 0) {
+                editorScrollBar?.setProgress(scrollY.toFloat() / maxScroll)
+                editorScrollBar?.setThumbRatio(viewportHeight.toFloat() / contentHeight)
+            } else {
+                editorScrollBar?.setProgress(0f)
+            }
+        }
+        editorScrollBar?.onProgressChange = { progress ->
+            val sv = editorScrollView
+            if (sv != null) {
+                val contentHeight = sv.getChildAt(0)?.height ?: 0
+                val viewportHeight = sv.height
+                val maxScroll = (contentHeight - viewportHeight).coerceAtLeast(0)
+                sv.scrollTo(0, (progress * maxScroll).toInt())
+            }
+        }
+    }
+
+    private fun syncEditorScrollBar() {
+        val editorScrollView = findViewById<android.widget.ScrollView>(R.id.editorScrollView)
+        val editorScrollBar = findViewById<VerticalScrollBar>(R.id.editorScrollBar) ?: return
+        val contentHeight = editorScrollView?.getChildAt(0)?.height ?: 0
+        val viewportHeight = editorScrollView?.height ?: 0
+        val maxScroll = (contentHeight - viewportHeight).coerceAtLeast(0)
+        if (maxScroll > 0 && contentHeight > 0) {
+            editorScrollBar.setProgress(editorScrollView!!.scrollY.toFloat() / maxScroll)
+            editorScrollBar.setThumbRatio(viewportHeight.toFloat() / contentHeight)
+        } else {
+            editorScrollBar.setProgress(0f)
+        }
     }
 
     override fun onDestroy() {
@@ -291,48 +354,65 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showMenuSheet() {
-        val sheet = BottomSheetDialog(this)
-        val view = layoutInflater.inflate(R.layout.bottom_sheet_menu, null)
-        sheet.setContentView(view)
-        sheet.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        sheet.behavior.isFitToContents = false
+    private fun setupDrawerMenuListeners() {
+        val fileSectionHeader = findViewById<View>(R.id.file_section_header)
+        val fileSectionContent = findViewById<View>(R.id.file_section_content)
+        val fileSectionChevron = findViewById<ImageView>(R.id.file_section_chevron)
+        fileSectionHeader.setOnClickListener {
+            val visible = fileSectionContent.visibility == View.VISIBLE
+            fileSectionContent.visibility = if (visible) View.GONE else View.VISIBLE
+            fileSectionChevron.setImageResource(if (visible) R.drawable.ic_expand_more else R.drawable.ic_expand_less)
+        }
 
-        val btnSave = view.findViewById<Button>(R.id.btnSave)
-        val btnOpen = view.findViewById<Button>(R.id.btnOpen)
-        val btnTemplates = view.findViewById<Button>(R.id.btnTemplates)
-        val btnFindReplace = view.findViewById<Button>(R.id.btnFindReplace)
-        val btnExportPdf = view.findViewById<Button>(R.id.btnExportPdf)
-        val btnJumpToLine = view.findViewById<Button>(R.id.btnJumpToLine)
-        val btnOptions = view.findViewById<Button>(R.id.btnOptions)
-        val recentList = view.findViewById<LinearLayout>(R.id.recent_files_list)
+        val btnSave = findViewById<Button>(R.id.btnSave)
+        val btnOpen = findViewById<Button>(R.id.btnOpen)
+        val btnTemplates = findViewById<Button>(R.id.btnTemplates)
+        val btnExportPdf = findViewById<Button>(R.id.btnExportPdf)
+        val btnOptions = findViewById<Button>(R.id.btnOptions)
+        val recentList = findViewById<LinearLayout>(R.id.recent_files_list)
+        val btnClearRecent = findViewById<Button>(R.id.btnClearRecent)
 
-        btnSave.setOnClickListener { saveCurrentDocument(); sheet.dismiss() }
+        fun closeDrawer() { drawerLayout.closeDrawer(drawerMenu) }
+
+        btnSave.setOnClickListener { saveCurrentDocument(); closeDrawer() }
         btnOpen.setOnClickListener {
             openDocument.launch(arrayOf("text/plain", "application/x-tex", "*/*"))
-            sheet.dismiss()
+            closeDrawer()
         }
         btnTemplates.setOnClickListener {
-            sheet.dismiss()
+            closeDrawer()
             showTemplatesDialog()
         }
-        btnFindReplace.setOnClickListener {
-            sheet.dismiss()
-            showFindReplaceDialog()
-        }
         btnExportPdf.setOnClickListener {
-            sheet.dismiss()
+            closeDrawer()
             exportPreviewToPdf()
         }
-        btnJumpToLine.setOnClickListener {
-            sheet.dismiss()
-            showJumpToLineDialog()
+        val btnTemplateDefaults = findViewById<Button>(R.id.btnTemplateDefaults)
+        btnTemplateDefaults.setOnClickListener {
+            closeDrawer()
+            showTemplateDefaultsDialog()
         }
         btnOptions.setOnClickListener {
-            sheet.dismiss()
+            closeDrawer()
             showOptionsSheet()
         }
 
+        btnClearRecent.setOnClickListener {
+            RecentFilesPrefs.clearRecent(this)
+            refreshDrawerRecentList()
+        }
+
+        drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerOpened(drawerView: View) { refreshDrawerRecentList() }
+            override fun onDrawerClosed(drawerView: View) {}
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+            override fun onDrawerStateChanged(newState: Int) {}
+        })
+        refreshDrawerRecentList()
+    }
+
+    private fun refreshDrawerRecentList() {
+        val recentList = findViewById<LinearLayout>(R.id.recent_files_list)
         recentList.removeAllViews()
         val recentFiles = RecentFilesPrefs.getRecent(this)
         if (recentFiles.isEmpty()) {
@@ -359,7 +439,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 itemView.setOnClickListener {
-                    sheet.dismiss()
+                    drawerLayout.closeDrawer(drawerMenu)
                     openRecentUri(entry.uri)
                 }
 
@@ -378,27 +458,11 @@ class MainActivity : AppCompatActivity() {
                 recentList.addView(itemView)
             }
         }
-
-        val btnClearRecent = view.findViewById<Button>(R.id.btnClearRecent)
-        btnClearRecent.setOnClickListener {
-            RecentFilesPrefs.clearRecent(this)
-            recentList.removeAllViews()
-            TextView(this).apply {
-                text = getString(R.string.no_recent_files)
-                setPadding(0, 12, 0, 12)
-                setTextColor(0xFF9E9E9E.toInt())
-            }.let { recentList.addView(it) }
-        }
-
-        sheet.show()
     }
 
     private fun showOptionsSheet() {
-        val sheet = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.bottom_sheet_options, null)
-        sheet.setContentView(view)
-        sheet.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-        sheet.behavior.isFitToContents = false
+        val dialog = MaterialAlertDialogBuilder(this).setView(view).create()
 
         val btnThemeLight = view.findViewById<Button>(R.id.btnThemeLight)
         val btnThemeDark = view.findViewById<Button>(R.id.btnThemeDark)
@@ -406,19 +470,19 @@ class MainActivity : AppCompatActivity() {
         btnThemeLight.setOnClickListener {
             EditorPrefs.setNightMode(this, AppCompatDelegate.MODE_NIGHT_NO)
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            sheet.dismiss()
+            dialog.dismiss()
             recreate()
         }
         btnThemeDark.setOnClickListener {
             EditorPrefs.setNightMode(this, AppCompatDelegate.MODE_NIGHT_YES)
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            sheet.dismiss()
+            dialog.dismiss()
             recreate()
         }
         btnThemeSystem.setOnClickListener {
             EditorPrefs.setNightMode(this, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-            sheet.dismiss()
+            dialog.dismiss()
             recreate()
         }
 
@@ -428,12 +492,12 @@ class MainActivity : AppCompatActivity() {
         btnConnectGoogleDrive.text = if (CloudPrefs.isGoogleDriveConnected(this)) getString(R.string.connected_google_drive) else getString(R.string.connect_google_drive)
         btnConnectGitHub.setOnClickListener {
             GitHubOAuthHelper.launchSignIn(this, BuildConfig.GITHUB_CLIENT_ID, BuildConfig.GITHUB_CLIENT_SECRET.ifBlank { null })
-            sheet.dismiss()
+            dialog.dismiss()
         }
         btnConnectGoogleDrive.setOnClickListener {
             val client = GoogleDriveHelper.getSignInClient(this, BuildConfig.GOOGLE_WEB_CLIENT_ID.ifBlank { null })
             googleSignInLauncher.launch(client.signInIntent)
-            sheet.dismiss()
+            dialog.dismiss()
         }
 
         val checkLineNumbers = view.findViewById<CheckBox>(R.id.checkLineNumbers)
@@ -466,13 +530,40 @@ class MainActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
 
-        sheet.show()
+        dialog.show()
+    }
+
+    private fun showTemplateDefaultsDialog() {
+        val view = layoutInflater.inflate(R.layout.dialog_template_defaults, null)
+        val dialog = MaterialAlertDialogBuilder(this).setView(view).create()
+
+        val defaults = TemplateDefaultsPrefs.get(this)
+        view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateAuthor).setText(defaults.author)
+        view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateAffiliate).setText(defaults.affiliate)
+        view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateAddress).setText(defaults.address)
+        view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateEmail).setText(defaults.email)
+        view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateOrcid).setText(defaults.orcid)
+
+        view.findViewById<Button>(R.id.btnTemplateDefaultsCancel).setOnClickListener { dialog.dismiss() }
+        view.findViewById<Button>(R.id.btnTemplateDefaultsSave).setOnClickListener {
+            val newDefaults = TemplateDefaultsPrefs.TemplateDefaults(
+                author = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateAuthor).text.toString(),
+                affiliate = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateAffiliate).text.toString(),
+                address = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateAddress).text.toString(),
+                email = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateEmail).text.toString(),
+                orcid = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.editTemplateOrcid).text.toString()
+            )
+            TemplateDefaultsPrefs.save(this, newDefaults)
+            dialog.dismiss()
+            Toast.makeText(this, getString(R.string.template_defaults_summary), Toast.LENGTH_SHORT).show()
+        }
+
+        dialog.show()
     }
 
     private fun showFindReplaceDialog() {
-        val dialog = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.dialog_find_replace, null)
-        dialog.setContentView(view)
+        val dialog = MaterialAlertDialogBuilder(this).setView(view).create()
 
         val editFind = view.findViewById<EditText>(R.id.editFind)
         val editReplace = view.findViewById<EditText>(R.id.editReplace)
@@ -784,10 +875,62 @@ class MainActivity : AppCompatActivity() {
                 R.id.action_insert_tikz -> { showInsertTikzDialog(); true }
                 R.id.action_insert_table -> { showInsertTableDialog(); true }
                 R.id.action_insert_list -> { showInsertListDialog(); true }
+                R.id.action_insert_symbols -> {
+                    // Defer so popup menu can dismiss first; avoids app losing focus / launcher transition
+                    editText.postDelayed({ showSymbolsGridDialog() }, 120)
+                    true
+                }
                 else -> false
             }
         }
         popup.show()
+    }
+
+    private fun showSymbolsGridDialog() {
+        if (!isFinishing) {
+            val view = layoutInflater.inflate(R.layout.dialog_symbols_grid, null)
+            val dialog = MaterialAlertDialogBuilder(this)
+                .setView(view)
+                .setCancelable(true)
+                .create()
+
+            val grid = view.findViewById<android.widget.GridLayout>(R.id.symbols_grid)
+            val btnClose = view.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_symbols_close)
+            btnClose.setOnClickListener { dialog.dismiss() }
+
+            val columnCount = 4
+            grid.rowCount = (INSERT_SYMBOLS.size + columnCount - 1) / columnCount
+            grid.columnCount = columnCount
+            val dp = resources.displayMetrics.density
+            val margin = (dp * 4).toInt()
+            val rowHeight = (dp * 40).toInt()
+            for ((index, pair) in INSERT_SYMBOLS.withIndex()) {
+                val (label, text) = pair
+                val itemView = layoutInflater.inflate(R.layout.item_symbol_button, grid, false)
+                val btn = itemView.findViewById<com.google.android.material.button.MaterialButton>(R.id.symbolButton)
+                btn.text = label
+                btn.setOnClickListener {
+                    insertAtCursor(text)
+                    dialog.dismiss()
+                }
+                val row = index / columnCount
+                val col = index % columnCount
+                val params = android.widget.GridLayout.LayoutParams().apply {
+                    width = 0
+                    height = rowHeight
+                    setMargins(margin, margin, margin, margin)
+                    rowSpec = android.widget.GridLayout.spec(row, 1)
+                    columnSpec = android.widget.GridLayout.spec(col, 1f)
+                }
+                grid.addView(itemView, params)
+            }
+
+            dialog.show()
+            dialog.window?.setLayout(
+                (resources.displayMetrics.widthPixels * 0.85f).toInt(),
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
     }
 
     private fun showInsertImageOptions() {
@@ -846,7 +989,7 @@ class MainActivity : AppCompatActivity() {
             insertAtCursor(latex)
             setPreviewBaseDirForImages(imagesDir.absolutePath)
         } catch (e: Exception) {
-            Toast.makeText(this, "Insert image: ${e.message}", Toast.LENGTH_SHORT).show()
+            ErrorDialog.show(this, "Insert image: ${e.message ?: "Unknown error"}")
         }
     }
 
@@ -855,9 +998,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showTemplatesDialog() {
-        val dialog = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.dialog_templates, null)
-        dialog.setContentView(view)
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(view)
+            .create()
 
         val templatesList = view.findViewById<LinearLayout>(R.id.templates_list)
         val btnCancel = view.findViewById<Button>(R.id.btnCancel)
@@ -881,13 +1025,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         dialog.show()
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.9f).toInt(),
+            android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     private fun createDocumentFromTemplate(template: LatexTemplates.Template) {
         syncEditorToCurrentDoc()
         untitledCounter++
+        val defaults = TemplateDefaultsPrefs.get(this)
+        val content = LatexTemplates.applyDefaults(template.content, defaults)
         val newDoc = LatexDocument(
-            content = template.content,
+            content = content,
             savedUri = null,
             displayName = "${template.name} $untitledCounter",
             isDirty = false
@@ -896,6 +1046,7 @@ class MainActivity : AppCompatActivity() {
         currentDocIndex = documents.size - 1
         loadCurrentDocIntoEditor()
         refreshDocumentTabs()
+        drawerLayout.openDrawer(drawerMenu)
         Toast.makeText(this, "Created from ${template.name}", Toast.LENGTH_SHORT).show()
     }
 
@@ -911,9 +1062,10 @@ class MainActivity : AppCompatActivity() {
                 currentDocIndex = documents.size - 1
                 loadCurrentDocIntoEditor()
                 refreshDocumentTabs()
+                drawerLayout.openDrawer(drawerMenu)
             }
         } catch (e: Exception) {
-            Toast.makeText(this, getString(R.string.open_file) + ": " + (e.message ?: ""), Toast.LENGTH_SHORT).show()
+            ErrorDialog.show(this, getString(R.string.open_file) + ": " + (e.message ?: ""))
         }
     }
 
@@ -1014,44 +1166,13 @@ class MainActivity : AppCompatActivity() {
         editorContainer.visibility = if (showPreview) View.GONE else View.VISIBLE
         webView.visibility = if (showPreview) View.VISIBLE else View.GONE
         findViewById<View>(R.id.previewToolbar).visibility = if (showPreview) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.btnInsertAdd).visibility = if (showPreview) View.GONE else View.VISIBLE
         btnPreview.text = if (showPreview) getString(R.string.editor) else getString(R.string.preview)
         btnPreview.contentDescription = if (showPreview) getString(R.string.editor) else getString(R.string.preview)
     }
 
     private fun setupDocumentTabs() {
-        tabs.removeAllTabs()
-        addDocumentTabsToBar()
-        val newTab = tabs.newTab()
-        newTab.tag = -1
-        newTab.customView = makeDocTabView(getString(R.string.tab_new), -1, withClose = false, isDirty = false)
-        tabs.addTab(newTab)
-
-        tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                when (val tag = tab?.tag) {
-                    null -> { }
-                    -1 -> {
-                        syncEditorToCurrentDoc()
-                        untitledCounter++
-                        val newDoc = LatexDocument("", null, getString(R.string.untitled) + " $untitledCounter", false)
-                        documents.add(newDoc)
-                        currentDocIndex = documents.size - 1
-                        loadCurrentDocIntoEditor()
-                        refreshDocumentTabs()
-                    }
-                    MORE_TAB_TAG -> showMoreTabsSheet()
-                    else -> {
-                        val idx = tag as Int
-                        syncEditorToCurrentDoc()
-                        currentDocIndex = idx
-                        loadCurrentDocIntoEditor()
-                    }
-                }
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
-        tabs.selectTab(tabs.getTabAt(currentDocIndex.coerceIn(0, (tabs.tabCount - 1).coerceAtLeast(0))))
+        refreshDocumentTabs()
     }
 
     private fun addDocumentTabsToBar() {
@@ -1059,30 +1180,39 @@ class MainActivity : AppCompatActivity() {
             for (index in 0 until minOf(4, documents.size)) {
                 val doc = documents[index]
                 val name = doc.effectiveName() + if (doc.isDirty) " •" else ""
-                val tab = tabs.newTab()
-                tab.tag = index
-                tab.customView = makeDocTabView(name, index, withClose = true, isDirty = doc.isDirty)
-                tabs.addTab(tab)
+                val row = makeDocTabView(name, index, withClose = true, isDirty = doc.isDirty)
+                row.tag = index
+                row.setOnClickListener {
+                    syncEditorToCurrentDoc()
+                    currentDocIndex = index
+                    loadCurrentDocIntoEditor()
+                    refreshDocumentTabs()
+                }
+                documentTabsContainer.addView(row)
             }
-            val moreTab = tabs.newTab()
-            moreTab.tag = MORE_TAB_TAG
-            moreTab.customView = makeDocTabView(getString(R.string.more_tabs, documents.size), MORE_TAB_TAG, withClose = false, isDirty = false, contentDesc = getString(R.string.all_documents))
-            tabs.addTab(moreTab)
+            val moreRow = makeDocTabView(getString(R.string.more_tabs, documents.size), MORE_TAB_TAG, withClose = false, isDirty = false, contentDesc = getString(R.string.all_documents))
+            moreRow.tag = MORE_TAB_TAG
+            moreRow.setOnClickListener { showMoreTabsSheet() }
+            documentTabsContainer.addView(moreRow)
         } else {
             documents.forEachIndexed { index, doc ->
                 val name = doc.effectiveName() + if (doc.isDirty) " •" else ""
-                val tab = tabs.newTab()
-                tab.tag = index
-                tab.customView = makeDocTabView(name, index, withClose = true, isDirty = doc.isDirty)
-                tabs.addTab(tab)
+                val row = makeDocTabView(name, index, withClose = true, isDirty = doc.isDirty)
+                row.tag = index
+                row.setOnClickListener {
+                    syncEditorToCurrentDoc()
+                    currentDocIndex = index
+                    loadCurrentDocIntoEditor()
+                    refreshDocumentTabs()
+                }
+                documentTabsContainer.addView(row)
             }
         }
     }
 
     private fun showMoreTabsSheet() {
-        val sheet = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.bottom_sheet_more_tabs, null)
-        sheet.setContentView(view)
+        val dialog = MaterialAlertDialogBuilder(this).setView(view).create()
         val list = view.findViewById<LinearLayout>(R.id.more_tabs_list)
         list.removeAllViews()
         documents.forEachIndexed { index, doc ->
@@ -1095,39 +1225,68 @@ class MainActivity : AppCompatActivity() {
                 currentDocIndex = index
                 loadCurrentDocIntoEditor()
                 refreshDocumentTabs()
-                sheet.dismiss()
+                dialog.dismiss()
             }
             closeBtn.setOnClickListener {
-                sheet.dismiss()
+                dialog.dismiss()
                 tryCloseTab(index)
             }
             list.addView(row)
         }
-        sheet.show()
+        dialog.show()
     }
 
     private fun refreshDocumentTabs() {
-        tabs.removeAllTabs()
+        documentTabsContainer.removeAllViews()
         addDocumentTabsToBar()
-        val newTab = tabs.newTab()
-        newTab.tag = -1
-        newTab.customView = makeDocTabView(getString(R.string.tab_new), -1, withClose = false, isDirty = false)
-        tabs.addTab(newTab)
-        tabs.selectTab(tabs.getTabAt(currentDocIndex.coerceIn(0, (tabs.tabCount - 1).coerceAtLeast(0))))
+        val newRow = makeDocTabView(getString(R.string.tab_new), -1, withClose = false, isDirty = false)
+        newRow.tag = -1
+        newRow.setOnClickListener {
+            syncEditorToCurrentDoc()
+            untitledCounter++
+            val newDoc = LatexDocument("", null, getString(R.string.untitled) + " $untitledCounter", false)
+            documents.add(newDoc)
+            currentDocIndex = documents.size - 1
+            loadCurrentDocIntoEditor()
+            refreshDocumentTabs()
+            drawerLayout.openDrawer(drawerMenu)
+        }
+        documentTabsContainer.addView(newRow)
+        // Highlight selected row
+        val selectedTag = if (documents.size > MORE_TABS_THRESHOLD) {
+            if (currentDocIndex < 4) currentDocIndex else MORE_TAB_TAG
+        } else {
+            currentDocIndex.coerceIn(0, (documents.size - 1).coerceAtLeast(0))
+        }
+        val selectedColor = resolveColor(com.google.android.material.R.attr.colorPrimaryContainer)
+        val defaultColor = resolveColor(com.google.android.material.R.attr.colorSurface)
+        for (i in 0 until documentTabsContainer.childCount) {
+            val row = documentTabsContainer.getChildAt(i)
+            row.setBackgroundColor(if (row.tag == selectedTag) selectedColor else defaultColor)
+        }
         updateSaveStatusIcon()
+    }
+
+    private fun resolveColor(attrRes: Int): Int {
+        val typedValue = TypedValue()
+        theme.resolveAttribute(attrRes, typedValue, true)
+        return typedValue.data
     }
 
     private fun updateCurrentTabLabel() {
         val doc = documents.getOrNull(currentDocIndex) ?: return
-        val tab = tabs.getTabAt(currentDocIndex) ?: return
-        val name = doc.effectiveName() + if (doc.isDirty) " •" else ""
-        val statusDesc = if (doc.isDirty) getString(R.string.unsaved_changes) else getString(R.string.saved)
-        (tab.customView as? LinearLayout)?.let { wrap ->
-            val titleIndex = if (wrap.childCount >= 3) 1 else 0
-            (wrap.getChildAt(titleIndex) as? TextView)?.text = name
-            wrap.contentDescription = getString(R.string.tab_document_desc, doc.effectiveName(), statusDesc)
-            if (wrap.childCount >= 3) {
-                wrap.getChildAt(0).visibility = if (doc.isDirty) View.VISIBLE else View.GONE
+        if (documents.size > MORE_TABS_THRESHOLD && currentDocIndex >= 4) return
+        for (i in 0 until documentTabsContainer.childCount) {
+            val row = documentTabsContainer.getChildAt(i)
+            if (row.tag == currentDocIndex && row is LinearLayout) {
+                val name = doc.effectiveName() + if (doc.isDirty) " •" else ""
+                val titleIndex = if (row.childCount >= 3) 1 else 0
+                (row.getChildAt(titleIndex) as? TextView)?.text = name
+                row.contentDescription = getString(R.string.tab_document_desc, doc.effectiveName(), if (doc.isDirty) getString(R.string.unsaved_changes) else getString(R.string.saved))
+                if (row.childCount >= 3) {
+                    row.getChildAt(0).visibility = if (doc.isDirty) View.VISIBLE else View.GONE
+                }
+                break
             }
         }
         updateSaveStatusIcon()
@@ -1246,7 +1405,10 @@ class MainActivity : AppCompatActivity() {
                 documents[idx].displayName = name
             }
         } catch (e: Exception) {
-            runOnUiThread { Toast.makeText(this, e.message ?: "Save failed", Toast.LENGTH_SHORT).show() }
+            runOnUiThread {
+                drawerLayout.openDrawer(drawerMenu)
+                ErrorDialog.show(this, e.message ?: "Save failed")
+            }
         }
     }
 
@@ -1285,16 +1447,21 @@ class MainActivity : AppCompatActivity() {
             contentResolver.openInputStream(uri)?.use { input ->
                 val content = input.bufferedReader().readText()
                 val name = getFileNameFromUri(uri)
-                RecentFilesPrefs.addRecent(this, uri.toString(), name)
+                // Only add to recent if URI is a persistable document URI (e.g. /document/...).
+                // URIs with /external/file/... from some file managers are not reopenable later.
+                if (DocumentsContract.isDocumentUri(this, uri)) {
+                    RecentFilesPrefs.addRecent(this, uri.toString(), name)
+                }
                 val newDoc = LatexDocument(content, uri, name, false)
                 syncEditorToCurrentDoc()
                 documents.add(newDoc)
                 currentDocIndex = documents.size - 1
                 loadCurrentDocIntoEditor()
                 refreshDocumentTabs()
+                drawerLayout.openDrawer(drawerMenu)
             }
         } catch (e: Exception) {
-            Toast.makeText(this, e.message ?: "Open failed", Toast.LENGTH_SHORT).show()
+            ErrorDialog.show(this, e.message ?: "Open failed")
         }
     }
 
@@ -1359,6 +1526,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 lineNumberView.invalidate()
+                editText.post { syncEditorScrollBar() }
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -1401,13 +1569,15 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 val lineNum = previewErrorLineNumber(e, wrapped)
                 val lineInfo = if (lineNum != null) " (line $lineNum)" else ""
-                val msg = (e.message ?: e.toString()).replace("<", "&lt;").replace(">", "&gt;")
+                val fullMsg = e.message ?: e.toString()
+                val msg = fullMsg.replace("<", "&lt;").replace(">", "&gt;")
                 html = """<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="user-select: text; -webkit-user-select: text; -webkit-touch-callout: default;"><div style="user-select: text; -webkit-user-select: text; -webkit-touch-callout: default; padding: 1em;"><p style="color:#b91c1c; white-space: pre-wrap; user-select: text; -webkit-user-select: text; -webkit-touch-callout: default;">Preview error$lineInfo: $msg</p></div></body></html>"""
+                val displayMsg = if (fullMsg.length > 120) fullMsg.take(117) + "…" else fullMsg
                 withContext(Dispatchers.Main) {
                     lastPreviewErrorLine = lineNum
-                    lastPreviewErrorMsg = e.message
-                    previewErrorBannerText.text = if (lineNum != null) getString(R.string.preview_error_banner, lineNum) else getString(R.string.preview_error_banner_no_line)
-                    previewErrorBanner.contentDescription = previewErrorBannerText.text
+                    lastPreviewErrorMsg = fullMsg
+                    previewErrorBannerText.text = if (lineNum != null) getString(R.string.preview_error_banner, lineNum, displayMsg) else getString(R.string.preview_error_banner_no_line, displayMsg)
+                    previewErrorBanner.contentDescription = (if (lineNum != null) getString(R.string.preview_error_banner, lineNum, fullMsg) else getString(R.string.preview_error_banner_no_line, fullMsg)) + ". Tap to go to line or open editor."
                     previewErrorBanner.visibility = View.VISIBLE
                 }
             }

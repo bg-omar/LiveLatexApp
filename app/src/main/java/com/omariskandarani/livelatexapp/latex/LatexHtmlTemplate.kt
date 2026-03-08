@@ -49,7 +49,8 @@ internal fun buildHtml(fullTextHtml: String, macrosJs: String, lineMapOrigToMerg
     .syncline { display:inline-block; width:0; height:0; overflow:hidden; }
     html, body { height: 100%; margin: 0; }
     body { overflow-y: auto; }
-    .wrap { min-height: 100vh; }
+    .wrap { min-height: 100vh; padding-top: 56px; }
+    /* Floating zoom toolbar: reserve top space so title is not covered when scrolled to top */
     /* Floating zoom toolbar styles */
     .floating-toolbar {
       position: fixed;
@@ -89,6 +90,7 @@ internal fun buildHtml(fullTextHtml: String, macrosJs: String, lineMapOrigToMerg
     .multicol-wrap { display: flex; gap: 1em; margin: 0.5em 0; }
     .multicol-col { flex: 1 1 0; padding: 0 0.5em; }
     strong, em, u, small { display: inline; }
+    .ll-label { display: none; }
     /* Preview caret marker */
     .caret-mark { display:inline-block; border-left: 1.5px solid #4F46E5; height: 1em; margin-left:-0.75px; animation: llblink 1s step-end infinite; }
     @keyframes llblink { 50% { border-color: transparent; } }

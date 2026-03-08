@@ -30,6 +30,19 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="livelatex" android:host="github-callback" android:pathPrefix="/" />
             </intent-filter>
+            <!-- Open .tex files: app suggested when user opens a LaTeX file -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/x-tex" />
+                <data android:mimeType="application/x-tex" />
+                <data android:mimeType="application/x-latex" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" android:host="*" android:mimeType="*/*" android:pathPattern=".*\\.tex" />
+            </intent-filter>
             <!-- Google Drive / Google Sign-In can use the same activity for result handling if needed -->
         </activity>
         <provider

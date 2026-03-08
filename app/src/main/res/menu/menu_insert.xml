@@ -16,4 +16,8 @@
         android:id="@+id/action_insert_list"
         android:icon="@drawable/ic_insert_list"
         android:title="@string/insert_list"/>
+    <item
+        android:id="@+id/action_insert_symbols"
+        android:icon="@drawable/ic_braces"
+        android:title="@string/symbols_toggle"/>
 </menu>

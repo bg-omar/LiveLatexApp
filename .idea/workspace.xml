@@ -12,11 +12,6 @@
       </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_foreground.xml">
         <config>
-          <theme>@style/Base.Theme.LiveLatexApp</theme>
-        </config>
-      </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/drawable/ic_menu_hamburger.xml">
-        <config>
           <theme>@style/Theme.LiveLatexApp</theme>
         </config>
       </layout>
@@ -30,7 +25,22 @@
           <theme>@style/Theme.LiveLatexApp</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_more_tabs.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_options.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/dialog_find_replace.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/dialog_jump_to_line.xml">
         <config>
           <theme>@style/Theme.LiveLatexApp</theme>
         </config>
@@ -40,7 +50,17 @@
           <theme>@style/Theme.LiveLatexApp</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_more_tab.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_recent_file.xml">
+        <config>
+          <theme>@style/Theme.LiveLatexApp</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/item_symbol_button.xml">
         <config>
           <theme>@style/Theme.LiveLatexApp</theme>
         </config>
@@ -55,11 +75,6 @@
           <theme>@style/Theme.LiveLatexApp</theme>
         </config>
       </layout>
-      <layout url="file://$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml">
-        <config>
-          <theme>@style/Theme.LiveLatexApp</theme>
-        </config>
-      </layout>
     </layouts>
   </component>
   <component name="AutoImportSettings">
@@ -67,7 +82,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b8480210-f6c6-4ea1-83d6-93e0c3da24ad" name="Changes" comment="Implement LaTeX snippet insertion, preview error handling, and enhanced tab management&#10;&#10;- Add a new `LatexSnippets` utility to generate LaTeX code for lists, tables, figures, and TikZ diagrams&#10;- Implement an &quot;Insert&quot; menu with support for adding images (gallery/camera), tables, lists, and TikZ templates&#10;- Add a preview error banner that displays compilation errors and allows navigation to the specific error line in the editor&#10;- Enhance the preview toolbar with &quot;Refresh&quot; and &quot;Copy Text&quot; functionalities&#10;- Improve tab management with a &quot;More Tabs&quot; overflow sheet for when more than 5 documents are open&#10;- Update the recent files list to display the &quot;last opened&quot; timestamp&#10;- Add a &quot;Don't ask again&quot; preference for discarding unsaved changes when closing tabs&#10;- Update project configuration and UI styles, including new icons and layout improvements for dialogs and lists">
+      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/TemplateDefaultsPrefs.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_braces.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_template_defaults.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/flyin_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LatexTemplates.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LatexTemplates.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LineNumberView.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LineNumberView.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GitHubOAuthHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GitHubOAuthHelper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GoogleDriveHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GoogleDriveHelper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlTemplate.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlTemplate.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_options.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_options.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_symbol_button.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_symbol_button.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/menu_insert.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/menu_insert.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,10 +116,9 @@
   </component>
   <component name="CopilotPersistence">
     <persistenceIdMap>
-      <entry key="_C:/workspace/projects/LiveLatex/LiveLatexApp" value="3AQeQ9aADrVNK9AYXrBx1TQ4e8w" />
+      <entry key="_C:/workspace/projects/LiveLatex/LiveLatexApp" value="3AaBl6bYhXBTtqxqsdPq8mxeNgL" />
       <entry key="_C:/workspace/projects/LiveLatexApp" value="38fGEe7uWwAHvBtNwusFi1Qcu6B" />
       <entry key="_C:/workspace/projects/LiveLatexApp/app" value="3ACYmN8OYpfLMEHpB8ElXyJbFNM" />
-      <entry key="_C:/workspace/solo_projects/LiveLatex/LiveLatexApp" value="3AZJMsbJIXdR2UpuQLQpJlJXIFh" />
     </persistenceIdMap>
   </component>
   <component name="CopilotUserSelectedModel">
@@ -91,7 +127,7 @@
       <entry key="agent-panel" value="Auto" />
     </selectedModels>
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\Omar.Iskandarani\.android\avd\Pixel_9_Pro_Fold.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[PhysicalDevice::serial=R5CY83METKL]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -157,11 +193,6 @@
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="verification" type="c8890929:TasksNode$1" />
               </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="LiveLatexApp" type="f1a62948:ProjectNode" />
-                <item name="Run Configurations" type="7b0102dc:RunConfigurationsNode" />
-              </path>
             </expand>
             <select />
           </tree_state>
@@ -176,6 +207,11 @@
       </list>
     </option>
   </component>
+  <component name="GenerateSignedApkSettings">
+    <option name="KEY_STORE_PATH" value="C:\Users\oscar\.android\adbkey" />
+    <option name="KEY_ALIAS" value="key" />
+    <option name="REMEMBER_PASSWORDS" value="true" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
@@ -185,26 +221,10 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="SYNC" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;OmarIskandarani-KSO&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/bg-omar/LiveLatexAndroid.git&quot;,
-    &quot;accountId&quot;: &quot;30d0aa0e-39f3-459a-9c53-aa1692da0f72&quot;
-  }
-}</component>
-  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\workspace\Gradle\gradle-9.3.1" javaHome="C:\Users\Omar.Iskandarani\AppData\Local\Programs\Android Studio\jbr" gradleVersion="9.3.1">
-    <option name="jvmArguments">
-      <list>
-        <option value="-Didea.compose.hot-reload=true" />
-        <option value="-Didea.compose.hot-reload.version=2" />
-      </list>
-    </option>
+  <component name="GithubDefaultAccount">
+    <option name="defaultAccountId" value="cb87385a-bb1c-43b6-a174-c4a6462e4498" />
   </component>
+  <component name="GradleScriptDefinitionsStorage" workingDir="$PROJECT_DIR$" gradleHome="C:\workspace\Gradle\gradle-9.3.1" javaHome="C:\Program Files\Android\Android Studio\jbr" gradleVersion="9.3.1" />
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -217,54 +237,58 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.Configure Daemon JVM Criteria.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.LiveLatexApp [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.LiveLatexApp [clean].executor&quot;: &quot;Run&quot;,
-    &quot;GradleDaemonJvmCriteriaMigrationNotification.isNotificationDisabled&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;false&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/workspace/projects/LiveLatex/LiveLatexApp&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Android App.app.executor": "Run",
+    "BundleExportedModule": "LiveLatexApp.app",
+    "ExportBundle.BundlePathForLiveLatexApp.app": "C:\\workspace\\projects\\LiveLatex\\LiveLatexApp\\app",
+    "Gradle.Configure Daemon JVM Criteria.executor": "Run",
+    "GradleDaemonJvmCriteriaMigrationNotification.isNotificationDisabled": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "false",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/workspace/projects/LiveLatexApp/app/src/main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.17",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "ExportApk.BuildVariants": [
+      "release"
+    ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\workspace\projects\LiveLatexApp\app\src\main" />
       <recent name="C:\workspace\projects\LiveLatexApp\app\src\main\res" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\workspace\solo_projects\LiveLatex\LiveLatexApp\docs" />
       <recent name="C:\workspace\projects\LiveLatexApp" />
     </key>
     <key name="K2MoveDeclarationsDialog.RECENT_PACKAGE_KEY">
       <recent name="com.omariskandarani.livelatexapp" />
     </key>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="LiveLatexApp.app" />
       <option name="ANDROID_RUN_CONFIGURATION_SCHEMA_VERSION" value="$GIT_TEST_DEBUG_UNSAFE_DIRECTORIES$" />
@@ -337,62 +361,6 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="LiveLatexApp [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="build" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <GradleProfilingDisabled>false</GradleProfilingDisabled>
-      <GradleCoverageDisabled>false</GradleCoverageDisabled>
-      <method v="2" />
-    </configuration>
-    <configuration name="LiveLatexApp [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="clean" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <GradleProfilingDisabled>false</GradleProfilingDisabled>
-      <GradleCoverageDisabled>false</GradleCoverageDisabled>
-      <method v="2" />
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Gradle.LiveLatexApp [build]" />
-        <item itemvalue="Gradle.LiveLatexApp [clean]" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -412,10 +380,7 @@
       <workItem from="1771916604743" duration="713000" />
       <workItem from="1772097810684" duration="382000" />
       <workItem from="1772291407285" duration="1173000" />
-      <workItem from="1772292617027" duration="636000" />
-      <workItem from="1772463698139" duration="70000" />
-      <workItem from="1772527625923" duration="38000" />
-      <workItem from="1772529203962" duration="213000" />
+      <workItem from="1772292617027" duration="476000" />
     </task>
     <task id="LOCAL-00001" summary="Add initial project structure and configuration files for LiveLatexApp">
       <option name="closed" value="true" />
@@ -498,7 +463,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="origin/main" />
+                        <option value="main" />
                       </list>
                     </value>
                   </entry>
@@ -533,12 +498,12 @@
       <map>
         <entry key="com.omariskandarani.livelatexapp">
           <value>
-            <CheckInfo lastCheckTimestamp="1772752810949" />
+            <CheckInfo lastCheckTimestamp="1772819101477" />
           </value>
         </entry>
         <entry key="com.omariskandarani.livelatexapp.test">
           <value>
-            <CheckInfo lastCheckTimestamp="1772752810950" />
+            <CheckInfo lastCheckTimestamp="1772819101478" />
           </value>
         </entry>
       </map>

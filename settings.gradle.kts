@@ -22,4 +22,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "LiveLatexApp"
 include(":app")
+// rust_core: app-variant met Rust native library voor LaTeX/PDF-compilatie
+include(":rust_core")
+include(":rust_core:app")
 

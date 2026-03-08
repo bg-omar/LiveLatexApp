@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import com.omariskandarani.livelatexapp.ErrorDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
@@ -33,7 +34,7 @@ object GitHubOAuthHelper {
      */
     fun launchSignIn(context: Context, clientId: String, clientSecret: String?) {
         if (clientId.isBlank()) {
-            Toast.makeText(context, "Configure GitHub Client ID in BuildConfig or settings", Toast.LENGTH_LONG).show()
+            ErrorDialog.show(context, "Configure GitHub Client ID in BuildConfig or settings")
             return
         }
         val uri = Uri.parse(AUTH_URL).buildUpon()
@@ -86,7 +87,7 @@ object GitHubOAuthHelper {
                 } else false
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "GitHub sign-in failed: ${e.message}", Toast.LENGTH_LONG).show()
+                    ErrorDialog.show(context, "GitHub sign-in failed: ${e.message ?: "Unknown error"}")
                 }
                 false
             }
