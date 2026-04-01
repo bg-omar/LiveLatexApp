@@ -50,8 +50,6 @@ internal fun sanitizeForMathJaxProse(bodyText: String): String {
         }
     }
 
-    s = convertAlignWithMultipleTagsToBlocks(s)
-
     val mathEnvs =
         "(?:equation\\*?|align\\*?|aligned\\*?|aligned|gather\\*?|multline\\*?|flalign\\*?|alignat\\*?|bmatrix|pmatrix|vmatrix|Bmatrix|Vmatrix|smallmatrix|matrix|cases|split)"
     val keepEnvs =
