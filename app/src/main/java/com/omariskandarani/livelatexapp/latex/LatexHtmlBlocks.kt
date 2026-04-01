@@ -316,23 +316,3 @@ $body
     }
 }
 
-internal fun convertAlignWithMultipleTagsToBlocks(s: String): String {
-    val rx = Regex("""\\begin\{align(\*?)\}(.+?)\\end\{align\1\}""", RegexOption.DOT_MATCHES_ALL)
-    return rx.replace(s) { m ->
-        val starred = m.groupValues[1].isNotEmpty()
-        val body = m.groupValues[2].trim()
-        val tagCount = Regex("""\\tag\{[^\u007D]*\u007D""").findAll(body).count()
-        if (tagCount < 2) {
-            m.value
-        } else {
-            val parts = Regex("""(?<!\\)\\\\(?:\s*\[[^]]*])?\s*""")
-                .split(body)
-                .map { it.trim() }
-                .filter { it.isNotEmpty() }
-            if (parts.isEmpty()) return@replace m.value
-            parts.joinToString("\n\n") { line ->
-                """\\begin{align} $line \\end{align}"""
-            }
-        }
-    }
-}
