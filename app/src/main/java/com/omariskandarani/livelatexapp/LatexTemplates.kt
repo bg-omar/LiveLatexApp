@@ -13,9 +13,11 @@ object LatexTemplates {
     private const val P_CONTENT = "{{CONTENT}}"
 
     data class Template(
+        val id: String,
         val name: String,
         val description: String,
-        val content: String
+        val content: String,
+        val isBuiltin: Boolean = true
     )
 
     /** Replaces template placeholders with values from defaults (and optional letter fields). Leaves placeholder if value blank. */
@@ -38,8 +40,10 @@ object LatexTemplates {
         return out
     }
 
-    val templates = listOf(
+    /** Built-in presets (always available as starting points for new templates). */
+    val BUILTIN_TEMPLATES = listOf(
         Template(
+            id = "builtin_0",
             name = "Empty Document",
             description = "Blank LaTeX document",
             content = """
@@ -63,6 +67,7 @@ Your content here.
         ),
 
         Template(
+            id = "builtin_1",
             name = "Article with Math",
             description = "Article with common math packages",
             content = """
@@ -96,6 +101,7 @@ ${'$'}${'$'}\ket{\psi} = \alpha\ket{0} + \beta\ket{1}${'$'}${'$'}
         ),
 
         Template(
+            id = "builtin_2",
             name = "Beamer Presentation",
             description = "Slide presentation template",
             content = """
@@ -137,6 +143,7 @@ Some content here.
         ),
 
         Template(
+            id = "builtin_3",
             name = "Report",
             description = "Academic report with sections",
             content = """
@@ -177,6 +184,7 @@ Summary and conclusions.
         ),
 
         Template(
+            id = "builtin_4",
             name = "Cover letter (journal)",
             description = "Submission cover letter with TITLE, SUBJECT, CONTENT placeholders",
             content = """
@@ -217,6 +225,7 @@ $P_ADDRESS}
         ),
 
         Template(
+            id = "builtin_5",
             name = "Homework",
             description = "Math/physics homework template",
             content = """
@@ -253,13 +262,15 @@ Your solution goes here.
         )
     )
 
+    /** @deprecated Use [BUILTIN_TEMPLATES] or [UserTemplatesPrefs.getEffectiveTemplates]. */
+    @Deprecated("Use BUILTIN_TEMPLATES or UserTemplatesPrefs.getEffectiveTemplates")
+    val templates: List<Template> get() = BUILTIN_TEMPLATES
+
     fun getTemplate(index: Int): Template? {
-        return templates.getOrNull(index)
+        return BUILTIN_TEMPLATES.getOrNull(index)
     }
 
     fun getTemplateByName(name: String): Template? {
-        return templates.find { it.name == name }
+        return BUILTIN_TEMPLATES.find { it.name == name }
     }
 }
-
-

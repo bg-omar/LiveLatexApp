@@ -12,6 +12,7 @@ import android.widget.ScrollView
 /**
  * A view that draws line numbers for the given EditText. Sync with the editor by calling
  * [setEditText] and ensure the editor calls [invalidate] on scroll and text change.
+ * Width fits the widest line label (current line count) plus horizontal padding.
  */
 class LineNumberView @JvmOverloads constructor(
     context: Context,
@@ -20,6 +21,8 @@ class LineNumberView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private var editText: EditText? = null
+    private var lastDigitCountForLayout = -1
+
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textSize = 12 * resources.displayMetrics.density
         val typedValue = TypedValue()
@@ -31,8 +34,44 @@ class LineNumberView @JvmOverloads constructor(
         }
     }
 
+    private val minWidthPx: Int
+        get() = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            20f,
+            resources.displayMetrics
+        ).toInt()
+
     fun setEditText(editor: EditText?) {
         editText = editor
+        lastDigitCountForLayout = -1
+        requestLayout()
+    }
+
+    private fun lineCountLabel(): String {
+        val n = editText?.lineCount?.coerceAtLeast(1) ?: 1
+        return n.toString()
+    }
+
+    private fun digitCountForLayout(): Int = lineCountLabel().length
+
+    override fun invalidate() {
+        val d = digitCountForLayout()
+        if (d != lastDigitCountForLayout) {
+            lastDigitCountForLayout = d
+            requestLayout()
+        }
+        super.invalidate()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val label = lineCountLabel()
+        val textW = paint.measureText(label)
+        val horizontal = paddingLeft + paddingRight
+        val desired = (textW + horizontal).toInt().coerceAtLeast(minWidthPx)
+        setMeasuredDimension(
+            resolveSize(desired, widthMeasureSpec),
+            resolveSize(View.MeasureSpec.getSize(heightMeasureSpec), heightMeasureSpec)
+        )
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -42,14 +81,18 @@ class LineNumberView @JvmOverloads constructor(
         val lineHeight = editor.lineHeight
         val paddingTop = editor.paddingTop
         val descent = paint.descent()
+        val gapEnd = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            4f,
+            resources.displayMetrics
+        )
         val parent = editor.parent
         if (parent is ScrollView) {
-            // LineNumberView and EditText are siblings inside ScrollView: draw all lines at fixed positions; they scroll together
             for (i in 0 until lineCount) {
                 val lineNum = i + 1
                 val y = paddingTop + (i + 1) * lineHeight - descent
                 val text = lineNum.toString()
-                val x = width - paint.measureText(text) - 8f
+                val x = width - paddingRight - gapEnd - paint.measureText(text)
                 canvas.drawText(text, x, y, paint)
             }
         } else {
@@ -60,7 +103,7 @@ class LineNumberView @JvmOverloads constructor(
                 val lineNum = i + 1
                 val y = paddingTop + (i + 1) * lineHeight - descent - scrollY
                 val text = lineNum.toString()
-                val x = width - paint.measureText(text) - 8f
+                val x = width - paddingRight - gapEnd - paint.measureText(text)
                 canvas.drawText(text, x, y, paint)
             }
         }

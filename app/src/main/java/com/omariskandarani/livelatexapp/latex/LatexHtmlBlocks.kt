@@ -10,7 +10,7 @@ import kotlin.text.RegexOption
 internal data class ColSpec(val align: String?, val widthPct: Int?)
 
 internal fun convertTcolorboxes(s: String): String {
-    val rx = Regex("""\\begin\{tcolorbox\}(?:\[((?:\\]|[^\]])*?)\])?(.+?)\\end\{tcolorbox\}""", RegexOption.DOT_MATCHES_ALL)
+    val rx = rxBetween("\\begin{tcolorbox}", "\\end{tcolorbox}", """(?:\[(.*?)\])?(.+?)""")
     return rx.replace(s) { m ->
         val opts = (m.groupValues.getOrNull(1) ?: "").trim()
         val body = m.groupValues[2].trim()
@@ -123,11 +123,11 @@ internal fun convertTabulars(text: String): String {
             .replace("\\midrule", "")
             .replace("\\bottomrule", "")
             .replace(Regex("""(?m)^\s*\\hline\s*$"""), "")
-            .replace(Regex("""(?<!\\)\\\\\s*\[[^\]]*]"""), "\\\\")
+            .replace(Regex("""(?<!\\)\\\\\s*\[(?:.*?)]""", RegexOption.DOT_MATCHES_ALL), "\\\\")
             .replace(Regex("""\\arraystretch\s*=\s*([0-9]*\.?[0-9]+)"""), "")
             .replace(Regex("""\\tabcolsep\s*=\s*([0-9]*\.?[0-9]+)"""), "")
-            .replace(Regex("""(?m)^\s*\\setlength\{\\tabcolsep\}\{[^\u007D]*\u007D.*$"""), "")
-            .replace(Regex("""(?m)^\s*\\renewcommand\{\\arraystretch\}\{[^\u007D]*\u007D.*$"""), "")
+            .replace(Regex("""(?m)^\s*\\setlength\{\\tabcolsep\}\{(.*?)\}.*$""", RegexOption.DOT_MATCHES_ALL), "")
+            .replace(Regex("""(?m)^\s*\\renewcommand\{\\arraystretch\}\{(.*?)\}.*$""", RegexOption.DOT_MATCHES_ALL), "")
             .trim()
         body = body.replace(Regex("""(?i)<br\s*/?>"""), "\\\\")
         val rows = Regex("""(?<!\\)\\\\\s*""").split(body).map { it.trim() }.filter { it.isNotEmpty() }
@@ -198,7 +198,7 @@ internal fun linewidthToPercent(expr: String): Int? {
 }
 
 internal fun convertHref(s: String): String =
-    s.replace(Regex("""\\href\{([^\u007D]*)\}\{([^\u007D]*)\}""")) { m ->
+    s.replace(Regex("""\\href\{(.*?)\}\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)) { m ->
         val url = m.groupValues[1]
         val txt = m.groupValues[2]
         """<a href="${escapeHtmlKeepBackslashes(url)}" target="_blank" rel="noopener">${escapeHtmlKeepBackslashes(txt)}</a>"""
@@ -206,41 +206,38 @@ internal fun convertHref(s: String): String =
 
 internal fun stripAuxDirectives(s: String): String {
     var t = s
-    t = t.replace(Regex("""\\addcontentsline\{[^\u007D]*\}\{[^\u007D]*\}\{[^\u007D]*\}"""), "")
-    t = t.replace(Regex("""\\nocite\{[^\u007D]*\}"""), "")
-    t = t.replace(Regex("""\\bibliographystyle\{[^\u007D]*\}"""), "")
+    t = t.replace(Regex("""\\addcontentsline\{(.*?)\}\{(.*?)\}\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL), "")
+    t = t.replace(Regex("""\\nocite\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL), "")
+    t = t.replace(Regex("""\\bibliographystyle\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL), "")
     t = t.replace(
-        Regex("""\\bibliography\{[^\u007D]*\}"""),
+        Regex("""\\bibliography\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL),
         """<div style="opacity:.7;margin:8px 0;">[References: compile in PDF mode]</div>"""
     )
     return t
 }
 
 internal fun convertTableEnvs(s: String): String {
-    val rx = Regex("""\\begin\{table\}(?:\[[^\]]*])?(.+?)\\end\{table\}""", RegexOption.DOT_MATCHES_ALL)
+    val rx = rxBetween("\\begin{table}", "\\end{table}", """(?:\[(?:.*?)\])?(.+?)""")
     return rx.replace(s) { m ->
         var body = m.groupValues[1]
         var captionHtml = ""
-        val capRx = Regex("""\\caption\{([^\u007D]*)\}""")
+        val capRx = Regex("""\\caption\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)
         val cap = capRx.find(body)
         if (cap != null) {
             captionHtml = """<figcaption style=\"opacity:.8;margin:6px 0 10px;\">${escapeHtmlKeepBackslashes(cap.groupValues[1])}</figcaption>"""
             body = body.replace(cap.value, "")
         }
         body = body.replace(Regex("""\\centering"""), "")
-            .replace(Regex("""\\label\{[^\u007D]*\}"""), "")
+            .replace(Regex("""\\label\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL), "")
         """<figure style=\"margin:14px 0;\">$body$captionHtml</figure>"""
     }
 }
 
 internal fun convertTheBibliography(s: String): String {
-    val rx = Regex(
-        """\\begin\{thebibliography\}\{[^\u007D]*\}(.+?)\\end\{thebibliography\}""",
-        RegexOption.DOT_MATCHES_ALL
-    )
+    val rx = rxBetween("\\begin{thebibliography}", "\\end{thebibliography}", """\{(.*?)\}(.+?)""")
     return rx.replace(s) { m ->
-        val body = m.groupValues[1]
-        val entries = Regex("""\\bibitem\{[^\u007D]*\}""")
+        val body = m.groupValues[2]
+        val entries = Regex("""\\bibitem\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)
             .split(body)
             .map { it.trim() }
             .filter { it.isNotEmpty() }
@@ -251,15 +248,15 @@ internal fun convertTheBibliography(s: String): String {
 }
 
 internal fun convertFigureEnvs(s: String): String {
-    val rx = Regex("""\\begin\{figure\}(?:\[[^\]]*])?(.+?)\\end\{figure\}""", RegexOption.DOT_MATCHES_ALL)
+    val rx = rxBetween("\\begin{figure}", "\\end{figure}", """(?:\[(?:.*?)\])?(.+?)""")
     return rx.replace(s) { m ->
         var body = m.groupValues[1]
-        body = body.replace(Regex("""(?m)^\s*\\setlength\{\\tabcolsep\}\{[^\u007D]*\u007D.*$"""), "")
-            .replace(Regex("""(?m)^\s*\\renewcommand\{\\arraystretch\}\{[^\u007D]*\u007D.*$"""), "")
+        body = body.replace(Regex("""(?m)^\s*\\setlength\{\\tabcolsep\}\{(.*?)\}.*$""", RegexOption.DOT_MATCHES_ALL), "")
+            .replace(Regex("""(?m)^\s*\\renewcommand\{\\arraystretch\}\{(.*?)\}.*$""", RegexOption.DOT_MATCHES_ALL), "")
         var imgHtml = ""
-        val inc = Regex("""\\includegraphics(?:\[[^\]]*])?\{([^\u007D]*)\}""").find(body)
+        val inc = Regex("""\\includegraphics(?:\[(?:.*?)\])?\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL).find(body)
         if (inc != null) {
-            val opts = Regex("""\\includegraphics(?:\[([^\]]*)])?\{([^\u007D]*)\}""").find(inc.value)
+            val opts = Regex("""\\includegraphics(?:\[(.*?)\])?\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL).find(inc.value)
             val (optStr, path) = if (opts != null) opts.groupValues[1] to opts.groupValues[2] else "" to inc.groupValues[1]
             val style = includeGraphicsStyle(optStr)
             val resolved = resolveImagePath(path)
@@ -280,9 +277,9 @@ internal fun convertFigureEnvs(s: String): String {
             }
         }
         body = body.replace(Regex("""\\centering"""), "")
-            .replace(Regex("""\\label\{[^\u007D]*\}"""), "")
+            .replace(Regex("""\\label\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL), "")
             .trim()
-        val hasSubEnv = Regex("""\\begin\{""").containsMatchIn(body)
+        val hasSubEnv = body.contains("\\begin{")
         val rest = if (body.isNotEmpty()) {
             if (hasSubEnv) "<div>$body</div>" else "<div>${latexProseToHtmlWithMath(body)}</div>"
         } else ""
@@ -291,11 +288,11 @@ internal fun convertFigureEnvs(s: String): String {
 }
 
 internal fun convertLongtablesToTables(s: String): String {
-    val rx = Regex("""\\begin\{longtable\}\{(.*?)\}(.+?)\\end\{longtable\}""", RegexOption.DOT_MATCHES_ALL)
+    val rx = rxBetween("\\begin{longtable}", "\\end{longtable}", """\{(.*?)\}(.+?)""")
     return rx.replace(s) { m ->
         val colspec = m.groupValues[1]
         var body    = m.groupValues[2]
-        val capRe = Regex("""\\caption\{([^\u007D]*)\}\s*\\\\?""")
+        val capRe = Regex("""\\caption\{(.*?)\}\s*\\\\?""", RegexOption.DOT_MATCHES_ALL)
         var caption = ""
         capRe.find(body)?.let { cap ->
             caption = cap.value
@@ -315,4 +312,3 @@ $body
         """.trimIndent()
     }
 }
-

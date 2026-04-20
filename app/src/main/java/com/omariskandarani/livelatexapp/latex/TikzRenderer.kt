@@ -2,6 +2,8 @@ package com.omariskandarani.livelatexapp.latex
 
 import java.io.File
 import java.security.MessageDigest
+import kotlin.text.Regex
+import kotlin.text.RegexOption
 
 /**
  * TikZ renderer for Android: preamble collection and placeholder for diagrams.
@@ -31,6 +33,25 @@ object TikzRenderer {
     }
     private fun fileUrl(f: File) = f.toURI().toString()
 
+    /** Optional `[...]` right after `\\begin{tikzpicture}`; avoids `\\[` / `\\]` in Regex (Android ICU). */
+    private fun splitTikzPictureOptsAndBody(inner: String): Pair<String, String> {
+        val s = inner.trimStart()
+        if (!s.startsWith('[')) return "" to inner
+        var depth = 0
+        var i = 0
+        while (i < s.length) {
+            when (s[i]) {
+                '[' -> depth++
+                ']' -> {
+                    depth--
+                    if (depth == 0) return s.substring(0, i + 1).trim() to s.substring(i + 1)
+                }
+            }
+            i++
+        }
+        return "" to inner
+    }
+
     private fun collectBalanced(cmd: String, s: String): List<String> {
         val out = mutableListOf<String>()
         var i = 0
@@ -51,12 +72,12 @@ object TikzRenderer {
 
     fun collectTikzPreamble(srcNoComments: String): String {
         val preamble = srcNoComments.substringBefore("\\begin{document}")
-        val pkgs = Regex("""\\usepackage(?:\[[^\]]*])?\{[^\u007D]+}""")
+        val pkgs = Regex("""\\usepackage(?:\[(?:.*?)\])?\{(.+?)\}""", RegexOption.DOT_MATCHES_ALL)
             .findAll(preamble).joinToString("\n") { it.value }
         val tikzsets = collectBalanced("\\tikzset", preamble).joinToString("\n")
         val libsSet = collectUsetikzlibsFromSource(preamble).toSortedSet()
         val libsLine = if (libsSet.isNotEmpty()) "\\usetikzlibrary{${libsSet.joinToString(",")}}\n" else ""
-        val needsTikzCd = Regex("""\\begin\{tikzcd}|\\usepackage\{tikz-cd}""").containsMatchIn(preamble)
+        val needsTikzCd = preamble.contains("\\begin{tikzcd}") || preamble.contains("\\usepackage{tikz-cd}")
         return buildString {
             appendLine("\\usepackage{tikz}")
             if (needsTikzCd) appendLine("\\usepackage{tikz-cd}")
@@ -66,26 +87,61 @@ object TikzRenderer {
         }
     }
 
-    private val TIKZ_PLACEHOLDER = """<div class="tikz-placeholder" style="display:block;margin:12px 0;padding:12px;background:var(--border, #e5e7eb);color:var(--muted, #6b7280);border-radius:6px;">[TikZ diagram — export to PDF to see full document]</div>"""
+    private fun tikzPreviewBlock(
+        key: String,
+        renderButtonLabel: String,
+        svgMarkup: String?,
+        /** When set (e.g. on Android), show this instead of the Render button when no cached SVG exists. */
+        noCompilerNote: String? = null,
+    ): String {
+        val svgPart = if (!svgMarkup.isNullOrBlank()) {
+            """<span class="tikz-wrap" style="display:block;margin:0 0 10px 0;">$svgMarkup</span>"""
+        } else ""
+        val footer = when {
+            !svgMarkup.isNullOrBlank() -> ""
+            !noCompilerNote.isNullOrBlank() -> {
+                val esc = htmlEscapeAll(noCompilerNote)
+                """<p class="ll-tikz-no-compiler-note" style="opacity:.9;font-size:0.92em;margin:10px 0 0 0;line-height:1.4;">$esc</p>"""
+            }
+            renderButtonLabel.isNotBlank() -> {
+                val labelEsc = htmlEscapeAll(renderButtonLabel)
+                """<button type="button" class="ll-render-tikz" style="font:inherit;padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--fg);cursor:pointer;" onclick="if(window.TikzAndroid){TikzAndroid.render('$key');}">$labelEsc</button>"""
+            }
+            else -> ""
+        }
+        return """
+            <div class="ll-tikz-block" style="display:block;margin:12px 0;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);">
+              $svgPart
+              $footer
+            </div>
+            """.trimIndent()
+    }
 
-    fun convertTikzPictures(htmlLike: String, fullSourceNoComments: String, tikzPreamble: String): String {
-        val rx = Regex(
-            """\\begin\{tikzpicture}(\[[^\]]*])?(.+?)\\end\{tikzpicture}""",
-            RegexOption.DOT_MATCHES_ALL
+    fun convertTikzPictures(
+        htmlLike: String,
+        fullSourceNoComments: String,
+        tikzPreamble: String,
+        renderButtonLabel: String = "Render TikZ",
+        noCompilerNote: String? = null,
+    ): String {
+        val rx = rxBetween(
+            "\\begin{tikzpicture}",
+            "\\end{tikzpicture}",
+            "(.*?)"
         )
         val userMacros = extractNewcommands(fullSourceNoComments)
         val texMacroDefs = buildTexNewcommands(userMacros)
         val srcLibs = collectUsetikzlibsFromSource(fullSourceNoComments)
 
         return rx.replace(htmlLike) { m ->
-            val opts = m.groupValues[1]
-            val body = m.groupValues[2].trim()
+            val (opts, bodyRaw) = splitTikzPictureOptsAndBody(m.groupValues[1])
+            val body = bodyRaw.trim()
             val hay = opts + "\n" + body
             val autoLibs = buildSet {
                 if (Regex("""-\{?Latex""").containsMatchIn(hay) || Regex(""">=\s*Latex""").containsMatchIn(hay)) add("arrows.meta")
                 if (Regex("""\b(left|right|above|below)\s*=\s*|[^=]\bof\b""").containsMatchIn(hay)) add("positioning")
                 if (Regex("""use\s+Hobby\s+shortcut|invert\s+soft\s+blanks|\[blank=""").containsMatchIn(hay)) addAll(listOf("hobby", "topaths"))
-                if (Regex("""\\begin\{knot}|\bflip crossing/""").containsMatchIn(hay)) addAll(listOf("knots", "hobby", "intersections", "decorations.pathreplacing", "shapes.geometric", "spath3", "topaths"))
+                if (hay.contains("\\begin{knot}") || hay.contains("flip crossing/")) addAll(listOf("knots", "hobby", "intersections", "decorations.pathreplacing", "shapes.geometric", "spath3", "topaths"))
             }
             val allLibs = (srcLibs + autoLibs).toSortedSet()
             val libsLine = if (allLibs.isNotEmpty()) "\\usetikzlibrary{${allLibs.joinToString(",")}}\n" else ""
@@ -104,21 +160,25 @@ $body
 \end{document}
             """.trimIndent()
             val key = sha1(texDoc)
+            LatexHtml.registerTikzRenderJob(key, texDoc)
             val cache = tikzCacheDir()
             val svg = File(cache, "$key.svg")
-            if (svg.exists()) {
-                return@replace """<span class="tikz-wrap" style="display:block;margin:12px 0;">${svg.readText()}</span>"""
-            }
-            return@replace TIKZ_PLACEHOLDER
+            val svgText = if (svg.exists()) svg.readText() else null
+            return@replace tikzPreviewBlock(key, renderButtonLabel, svgText, noCompilerNote)
         }
     }
 
     fun convertSstTikzMacros(s: String, srcNoComments: String): String {
         val preSeen = collectTikzPreamble(srcNoComments)
         val needsSst = Regex("""\\SST[A-Za-z]""").containsMatchIn(s) &&
-                !Regex("""\\usetikzlibrary\{[^\u007D]*\bsstknots\b""").containsMatchIn(preSeen)
+                !Regex("""\\usetikzlibrary\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL).findAll(preSeen).any { m ->
+                    Regex("""\bsstknots\b""").containsMatchIn(m.groupValues[1])
+                }
         val preamble = if (needsSst) preSeen + "\n\\usetikzlibrary{sstknots}\n" else preSeen
-        val rx = Regex("""\\SST[A-Za-z]+(?:\[[^\]]*])?(?:\{[^{}]*}){0,3}""")
+        val rx = Regex(
+            """\\SST[A-Za-z]+(?:\[(.*?)\])?(?:\{(.*?)\}(?:\{(.*?)\}(?:\{(.*?)\})?)?)?""",
+            RegexOption.DOT_MATCHES_ALL
+        )
         return rx.replace(s) { m ->
             val svg = renderTikzToSvg(preamble, m.value)
             if (svg != null)
@@ -160,7 +220,7 @@ $body
     }
 
     private fun collectUsetikzlibsFromSource(src: String): Set<String> =
-        Regex("""\\usetikzlibrary\{([^\u007D]*)}""")
+        Regex("""\\usetikzlibrary\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)
             .findAll(src)
             .flatMap { it.groupValues[1].split(',') }
             .map { it.trim() }
@@ -172,7 +232,7 @@ $body
 
     private fun extractNewcommands(s: String): Map<String, Macro> {
         val out = linkedMapOf<String, Macro>()
-        val rxNewStart = Regex("""\\newcommand\{\\([A-Za-z@]+)\}(?:\[(\d+)])?(?:\[[^\]]*])?\{""")
+        val rxNewStart = Regex("""\\newcommand\{\\([A-Za-z@]+)\}(?:\[(\d+)])?(?:\[(.*?)\])?\{""", RegexOption.DOT_MATCHES_ALL)
         var pos = 0
         while (true) {
             val m = rxNewStart.find(s, pos) ?: break

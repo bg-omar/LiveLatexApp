@@ -59,52 +59,82 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnFindPrevious"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            android:text="@string/previous"/>
+            android:orientation="horizontal">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnFindNext"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:text="@string/next"/>
+            <ImageButton
+                android:id="@+id/btnFindPrevious"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/previous"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_find_arrow_up"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnReplace"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
-            android:text="@string/replace"/>
+            <ImageButton
+                android:id="@+id/btnFindNext"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/next"
+                android:padding="10dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_find_arrow_down"/>
+        </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnReplaceAll"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:text="@string/replace_all"/>
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReplace"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:minHeight="48dp"
+                android:text="@string/replace"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/success_green"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReplaceAll"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:minHeight="48dp"
+                android:text="@string/replace_all"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/success_green"/>
+        </LinearLayout>
     </LinearLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnFindClose"
-        style="@style/Widget.Material3.Button.TextButton"
+        style="@style/Widget.Material3.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/cancel"/>
+        android:layout_marginTop="12dp"
+        android:minHeight="48dp"
+        android:text="@string/cancel"
+        android:textColor="@color/find_close_icon"
+        app:backgroundTint="@color/find_close_background"
+        app:icon="@drawable/ic_close"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:iconTint="@color/find_close_icon"/>
 </LinearLayout>

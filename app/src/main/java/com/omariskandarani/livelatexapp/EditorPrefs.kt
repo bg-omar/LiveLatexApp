@@ -16,8 +16,10 @@ object EditorPrefs {
     const val DEFAULT_AUTO_SAVE_INTERVAL_SEC = 30
 
     const val KEY_FIRST_LAUNCH_DONE = "first_launch_done"
+    /** Last app version (versionCode) for which we showed the template-defaults prompt; 0 = never. */
+    const val KEY_LAST_AUTHOR_PROMPT_VERSION_CODE = "last_author_prompt_version_code"
     const val KEY_SHOW_LINE_NUMBERS = "show_line_numbers"
-    const val DEFAULT_SHOW_LINE_NUMBERS = false
+    const val DEFAULT_SHOW_LINE_NUMBERS = true
 
     const val KEY_NIGHT_MODE = "night_mode"
     const val KEY_SKIP_DISCARD_CONFIRM = "skip_discard_confirm"
@@ -70,6 +72,18 @@ object EditorPrefs {
             .apply()
     }
 
+    fun getLastAuthorPromptVersionCode(context: Context): Int {
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .getInt(KEY_LAST_AUTHOR_PROMPT_VERSION_CODE, 0)
+    }
+
+    fun setLastAuthorPromptVersionCode(context: Context, versionCode: Int) {
+        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putInt(KEY_LAST_AUTHOR_PROMPT_VERSION_CODE, versionCode)
+            .apply()
+    }
+
     fun getShowLineNumbers(context: Context): Boolean {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
             .getBoolean(KEY_SHOW_LINE_NUMBERS, DEFAULT_SHOW_LINE_NUMBERS)
@@ -83,8 +97,14 @@ object EditorPrefs {
     }
 
     fun getNightMode(context: Context): Int {
-        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-            .getInt(KEY_NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        val p = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        var mode = p.getInt(KEY_NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_NO)
+        // Legacy: "System" option removed — map follow-system to light once.
+        if (mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
+            mode = AppCompatDelegate.MODE_NIGHT_NO
+            p.edit().putInt(KEY_NIGHT_MODE, mode).apply()
+        }
+        return mode
     }
 
     fun setNightMode(context: Context, mode: Int) {

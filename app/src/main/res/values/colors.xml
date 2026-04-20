@@ -10,4 +10,6 @@
     <color name="warning_orange">#FF9800</color>
     <color name="error_red">#F44336</color>
     <color name="info_blue">#2196F3</color>
+    <color name="find_close_background">#E0E0E0</color>
+    <color name="find_close_icon">#616161</color>
 </resources>

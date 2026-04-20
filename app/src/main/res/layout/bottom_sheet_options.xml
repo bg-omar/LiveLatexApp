@@ -44,7 +44,7 @@
                 android:layout_width="0dp"
                 android:layout_height="36dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="2dp"
+                android:layout_marginEnd="4dp"
                 android:text="@string/theme_light"
                 android:textSize="12sp"/>
 
@@ -54,54 +54,50 @@
                 android:layout_width="0dp"
                 android:layout_height="36dp"
                 android:layout_weight="1"
-                android:layout_marginStart="2dp"
-                android:layout_marginEnd="2dp"
+                android:layout_marginStart="4dp"
                 android:text="@string/theme_dark"
-                android:textSize="12sp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnThemeSystem"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:layout_marginStart="2dp"
-                android:text="@string/theme_system"
                 android:textSize="12sp"/>
         </LinearLayout>
 
-        <!-- Cloud -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/cloud_connections"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorPrimary"/>
-
+        <!-- Cloud (hidden when MainActivity.ENABLE_CLOUD_CONNECT is false) -->
         <LinearLayout
+            android:id="@+id/sectionCloud"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnConnectGitHub"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="2dp"
-                android:textSize="12sp"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/cloud_connections"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorPrimary"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnConnectGoogleDrive"
-                style="@style/Widget.Material3.Button.TextButton"
-                android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_weight="1"
-                android:layout_marginStart="2dp"
-                android:textSize="12sp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnConnectGitHub"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="2dp"
+                    android:textSize="12sp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnConnectGoogleDrive"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="2dp"
+                    android:textSize="12sp"/>
+            </LinearLayout>
         </LinearLayout>
 
         <!-- View -->
@@ -123,15 +119,6 @@
             android:textSize="14sp"
             app:buttonTint="?attr/colorPrimary"/>
 
-        <TextView
-            android:id="@+id/documentStats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textSize="12sp"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:text="@string/word_count"/>
-
         <!-- Editor -->
         <TextView
             android:layout_width="match_parent"
@@ -142,28 +129,79 @@
             android:textStyle="bold"
             android:textColor="?attr/colorPrimary"/>
 
+        <!-- Templates -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/templates"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:textColor="?attr/colorPrimary"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnManageTemplates"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/manage_templates"
+            android:textSize="13sp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <SeekBar
-                android:id="@+id/seekEditorFontSize"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:max="30"/>
-
-            <TextView
-                android:id="@+id/labelEditorFontSize"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditorFontSizeDown"
+                style="@style/Widget.Material3.Button.IconButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:minWidth="36dp"
-                android:text="14 sp"
-                android:textSize="12sp"
+                android:contentDescription="@string/decrease_font_size"
+                app:icon="@android:drawable/arrow_down_float"
+                app:iconTint="?attr/colorOnSurface"/>
+
+            <EditText
+                android:id="@+id/editEditorFontSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:minWidth="52dp"
+                android:gravity="center"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLength="2"
+                android:imeOptions="actionDone"
+                android:textSize="15sp"
                 android:textColor="?attr/colorOnSurface"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:text="@string/font_size_sp_unit"
+                android:textSize="14sp"
+                android:textColor="?attr/colorOnSurfaceVariant"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEditorFontSizeUp"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/increase_font_size"
+                app:icon="@android:drawable/arrow_up_float"
+                app:iconTint="?attr/colorOnSurface"/>
         </LinearLayout>
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/checkDebugPro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/debug_pro_toggle"
+            android:visibility="gone"/>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

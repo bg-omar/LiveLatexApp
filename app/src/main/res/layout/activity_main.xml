@@ -40,10 +40,17 @@
 
                         <com.omariskandarani.livelatexapp.LineNumberView
                             android:id="@+id/lineNumbers"
-                            android:layout_width="32dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="match_parent"
+                            android:minWidth="20dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="6dp"
                             android:visibility="gone"
-                            android:background="?attr/colorSurfaceVariant"/>
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:contentDescription="@string/jump_to_line"
+                            android:background="?attr/colorSurfaceVariant"
+                            android:foreground="?attr/selectableItemBackground"/>
 
                         <EditText
                             android:id="@+id/inputLatex"
@@ -72,6 +79,7 @@
         </LinearLayout>
 
         <FrameLayout
+            android:id="@+id/previewLayer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="top">
@@ -145,22 +153,7 @@
             </com.google.android.material.card.MaterialCardView>
         </FrameLayout>
 
-        <!-- Right side: Insert (+) button visible in editor, hidden in preview -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnInsertAdd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|top"
-            android:layout_margin="8dp"
-            android:layout_marginTop="72dp"
-            android:layout_marginEnd="8dp"
-            android:visibility="visible"
-            android:contentDescription="@string/insert_add_button"
-            app:srcCompat="@drawable/ic_add"
-            app:fabSize="mini"
-            app:tint="?attr/colorOnPrimary"/>
-
-        <!-- Bottom bar: no tabs (tabs are in left fly-in) -->
+        <!-- Bottom bar: actions; word/char counts stacked next to Preview -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -217,29 +210,169 @@
                 android:src="@drawable/ic_search"
                 android:scaleType="centerInside"/>
 
-            <ImageButton
-                android:id="@+id/btnJumpToLine"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/jump_to_line"
-                android:src="@drawable/ic_jump_to_line"
-                android:scaleType="centerInside"/>
-
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1"/>
+
+            <LinearLayout
+                android:id="@+id/documentStatsBottom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="end"
+                android:paddingStart="4dp"
+                android:paddingEnd="6dp">
+
+                <TextView
+                    android:id="@+id/textDocumentStatsWords"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textSize="11sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"/>
+
+                <TextView
+                    android:id="@+id/textDocumentStatsChars"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:textSize="11sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"/>
+            </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPreview"
                 style="@style/Widget.Material3.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="2dp"
                 android:layout_marginEnd="8dp"
                 android:minWidth="88dp"
                 android:text="@string/preview"/>
+        </LinearLayout>
+
+        <!-- Tab strip + Insert (full width; word/char stats in bottom bar) -->
+        <LinearLayout
+            android:id="@+id/documentStatsBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:baselineAligned="false"
+            android:paddingStart="8dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="@dimen/document_stats_bar_padding_bottom"
+            android:background="?attr/colorSurfaceVariant"
+            android:elevation="4dp">
+
+            <LinearLayout
+                android:id="@+id/findNavigationBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:visibility="gone"
+                android:paddingEnd="4dp">
+
+                <ImageButton
+                    android:id="@+id/btnFindNavPrevious"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/previous"
+                    android:padding="6dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_find_arrow_up"/>
+
+                <TextView
+                    android:id="@+id/textFindNavMatch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:paddingStart="2dp"
+                    android:paddingEnd="2dp"
+                    android:textSize="11sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:visibility="gone"/>
+
+                <ImageButton
+                    android:id="@+id/btnFindNavNext"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/next"
+                    android:padding="6dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_find_arrow_down"/>
+
+                <ImageButton
+                    android:id="@+id/btnFindNavClose"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="2dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/find_nav_close"
+                    android:padding="6dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_close"/>
+            </LinearLayout>
+
+            <HorizontalScrollView
+                android:id="@+id/documentTabsScroll"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:scrollbars="none"
+                android:fadeScrollbars="false"
+                android:fillViewport="false"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:id="@+id/documentTabsContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:minHeight="40dp"
+                    android:paddingVertical="2dp"/>
+            </HorizontalScrollView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPunctuation"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:minWidth="0dp"
+                android:minHeight="36dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingHorizontal="12dp"
+                android:text="@string/symbols_toggle"
+                android:textSize="13sp"
+                android:contentDescription="@string/punctuation_button_desc"
+                app:cornerRadius="18dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnInsertAdd"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="6dp"
+                android:minWidth="0dp"
+                android:minHeight="36dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:paddingHorizontal="14dp"
+                android:text="@string/section_insert"
+                android:textSize="13sp"
+                android:contentDescription="@string/insert_add_button"
+                app:cornerRadius="18dp"/>
         </LinearLayout>
     </FrameLayout>
 

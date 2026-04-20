@@ -9,7 +9,7 @@ import kotlin.text.RegexOption
 
 internal fun convertSections(s: String, absOffset: Int): String {
     fun inject(kind: String, tag: String, input: String): String {
-        val rx = Regex("""\\$kind\*?\{([^\u007D]*)\}""")
+        val rx = Regex("""\\$kind\*?\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)
         return rx.replace(input) { m ->
             val title = m.groupValues[1]
             val id    = "$kind-${slugify(title)}"
@@ -22,14 +22,14 @@ internal fun convertSections(s: String, absOffset: Int): String {
     t = inject("section", "h2", t)
     t = inject("subsection", "h3", t)
     t = inject("subsubsection", "h4", t)
-    t = Regex("""\\paragraph\{([^\u007D]*)\}""").replace(t) { m ->
+    t = Regex("""\\paragraph\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL).replace(t) { m ->
         val title = m.groupValues[1]
         val id    = "paragraph-${slugify(title)}"
         val abs   = absOffset + t.substring(0, m.range.first).count { it == '\n' } + 1
         val htm   = latexProseToHtmlWithMath(title)
         """<span class="llmark" data-id="$id" data-abs="$abs"></span><h5 id="$id" style="margin:1em 0 .3em 0;">$htm</h5>"""
     }
-    t = t.replace(Regex("""\\texorpdfstring\{([^\u007D]*)\}\{([^\u007D]*)\}""")) {
+    t = t.replace(Regex("""\\texorpdfstring\{(.*?)\}\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)) {
         latexProseToHtmlWithMath(it.groupValues[2])
     }
     t = t.replace(
@@ -40,7 +40,7 @@ internal fun convertSections(s: String, absOffset: Int): String {
 }
 
 internal fun convertLlmark(s: String, absOffset: Int): String {
-    val rx = Regex("""\\llmark(?:\[([^]]*)])?\{([^\u007D]*)\}""")
+    val rx = Regex("""\\llmark(?:\[(.*?)\])?\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)
     return rx.replace(s) { m ->
         val titleOpt = m.groupValues[1]
         val key      = m.groupValues[2].ifBlank { "mark" }
@@ -227,7 +227,7 @@ internal fun latexProseToHtmlWithMath(s: String): String {
 }
 
 internal fun convertMulticols(s: String): String {
-    val rx = Regex("""\\begin\{multicols\}\{(\d+)\}(.+?)\\end\{multicols\}""", RegexOption.DOT_MATCHES_ALL)
+    val rx = rxBetween("\\begin{multicols}", "\\end{multicols}", """\{(\d+)\}(.+?)""")
     return rx.replace(s) { m ->
         val n = (m.groupValues[1].toIntOrNull() ?: 2).coerceIn(1, 8)
         val body = latexProseToHtmlWithMath(m.groupValues[2].trim())
@@ -236,7 +236,7 @@ internal fun convertMulticols(s: String): String {
 }
 
 internal fun convertItemize(s: String): String {
-    val rx = Regex("""\\begin\{itemize\}(?:\[[^\]]*])?(.+?)\\end\{itemize\}""", RegexOption.DOT_MATCHES_ALL)
+    val rx = rxBetween("\\begin{itemize}", "\\end{itemize}", """(?:\[(?:.*?)\])?(.+?)""")
     return rx.replace(s) { m ->
         val body = m.groupValues[1]
         val parts = Regex("""(?m)^\s*\\item\s*""")
@@ -248,7 +248,7 @@ internal fun convertItemize(s: String): String {
 }
 
 internal fun convertEnumerate(s: String): String {
-    val rx = Regex("""\\begin\{enumerate\}(?:\[[^\]]*])?(.+?)\\end\{enumerate\}""", RegexOption.DOT_MATCHES_ALL)
+    val rx = rxBetween("\\begin{enumerate}", "\\end{enumerate}", """(?:\[(?:.*?)\])?(.+?)""")
     return rx.replace(s) { m ->
         val body = m.groupValues[1]
         val parts = Regex("""(?m)^\s*\\item\s*""")
@@ -260,10 +260,10 @@ internal fun convertEnumerate(s: String): String {
 }
 
 internal fun convertDescription(s: String): String {
-    val rxEnv = Regex("""\\begin\{description\}(?:\[[^\]]*])?(.+?)\\end\{description\}""", RegexOption.DOT_MATCHES_ALL)
+    val rxEnv = rxBetween("\\begin{description}", "\\end{description}", """(?:\[(?:.*?)\])?(.+?)""")
     return rxEnv.replace(s) { envMatch ->
         val body = envMatch.groupValues[1]
-        val rxItem = Regex("""(?ms)^\s*\\item(?:\s*\[([^\]]*)])?\s*(.*?)\s*(?=^\s*\\item|\z)""")
+        val rxItem = Regex("""(?ms)^\s*\\item(?:\s*\[(.*?)\])?\s*(.*?)\s*(?=^\s*\\item|\z)""", RegexOption.DOT_MATCHES_ALL)
         val items = rxItem.findAll(body).map { m ->
             val rawLabel   = m.groupValues[1]
             val rawContent = m.groupValues[2]

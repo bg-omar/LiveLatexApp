@@ -1,6 +1,7 @@
 package com.omariskandarani.livelatexapp.latex
 
 import java.io.File
+import java.io.IOException
 import java.nio.file.Paths
 import java.util.LinkedHashMap
 import kotlin.text.Regex
@@ -15,6 +16,12 @@ import kotlin.text.RegexOption
  */
 object LatexHtml {
     private val lazyTikzJobs = java.util.Collections.synchronizedMap(LinkedHashMap<String, String>())
+
+    /** Registers a TikZ job for [renderLazyTikzKeyToSvg] / preview “Render TikZ” buttons. */
+    @JvmStatic
+    internal fun registerTikzRenderJob(key: String, texDoc: String) {
+        lazyTikzJobs[key] = texDoc
+    }
     // Last computed line maps between original main file lines and merged (inlined) lines
     private var lineMapOrigToMergedJson: String? = null
     private var lineMapMergedToOrigJson: String? = null
@@ -22,16 +29,17 @@ object LatexHtml {
     // ─────────────────────────── PUBLIC ENTRY ───────────────────────────
     // BEGIN_DOCUMENT, END_DOCUMENT, slugify → LatexHtmlParsing.kt
 
-    fun wrap(texSource: String): String {
+    fun wrap(
+        texSource: String,
+        tikzRenderButtonLabel: String = "Render TikZ",
+        tikzNoCompilerNote: String? = null,
+    ): String {
         lazyTikzJobs.clear()
         val srcNoComments = stripLineComments(texSource)
         val userMacros    = extractNewcommands(srcNoComments)
         val macrosJs      = buildMathJaxMacros(userMacros)
         val titleMeta     = extractTitleMeta(srcNoComments)
-        // TikZ temporarily disabled for Android preview (avoids regex/engine issues)
-        // val tikzPreamble  = TikzRenderer.collectTikzPreamble(srcNoComments)
-        val tikzPreamble  = ""
-
+        val tikzPreamble  = TikzRenderer.collectTikzPreamble(srcNoComments)
 
         // Find body & absolute line offset of the first body line
         val beginIdx  = texSource.indexOf(BEGIN_DOCUMENT)
@@ -49,11 +57,10 @@ object LatexHtml {
         val body2 = sanitizeForMathJaxProse(body1b)
         val body2b = convertIncludeGraphics(body2)
 
-        // TikZ temporarily disabled for Android preview
-        // val body2c = TikzRenderer.convertTikzPictures(body2b, srcNoComments,tikzPreamble)
-        // val body2d = TikzRenderer.convertSstTikzMacros(body2c, srcNoComments)
-        val body2c = body2b
-        val body2d = body2c
+        val body2c = TikzRenderer.convertTikzPictures(
+            body2b, srcNoComments, tikzPreamble, tikzRenderButtonLabel, tikzNoCompilerNote
+        )
+        val body2d = TikzRenderer.convertSstTikzMacros(body2c, srcNoComments)
 
         val body3 = applyProseConversions(body2d, titleMeta, absOffset, srcNoComments, tikzPreamble)
         val body3b = convertParagraphsOutsideTags(body3)
@@ -96,7 +103,7 @@ object LatexHtml {
     private fun extractNewcommands(s: String): Map<String, Macro> {
         val out = LinkedHashMap<String, Macro>()
         fun parseCommand(cmd: String) {
-            val rx = Regex("""\\$cmd\s*\{\\([A-Za-z@]+)\}(?:\s*\[(\d+)])?(?:\s*\[[^\]]*])?\s*\{""")
+            val rx = Regex("""\\$cmd\s*\{\\([A-Za-z@]+)\}(?:\s*\[(\d+)])?(?:\s*\[(.*?)\])?\s*\{""", RegexOption.DOT_MATCHES_ALL)
             var pos = 0
             while (true) {
                 val m = rx.find(s, pos) ?: break
@@ -188,18 +195,30 @@ object LatexHtml {
     }
     private fun fileUrl(f: File) = f.toURI().toString()
 
+    /** True when running on Android ART/Dalvik — no `pdflatex` / TeX toolchain in the app sandbox. */
+    private val isAndroidRuntime: Boolean by lazy {
+        try {
+            Class.forName("android.os.Build")
+            true
+        } catch (_: ClassNotFoundException) {
+            false
+        }
+    }
+
     // Try to find tools once and cache the result
     private data class TikzTools(val dvisvgm: String?, val pdf2svg: String?)
     private var _tikzTools: TikzTools? = null
     private fun findTikzTools(): TikzTools {
         _tikzTools?.let { return it }
-        fun which(cmd: String): String? {
+        fun which(cmd: String): String? = try {
             val isWin = (System.getProperty("os.name") ?: "").lowercase().contains("win")
             val proc = ProcessBuilder(if (isWin) listOf("where", cmd) else listOf("which", cmd))
                 .redirectErrorStream(true).start()
             val out = proc.inputStream.bufferedReader().readText().trim()
             val ok = proc.waitFor() == 0 && out.isNotBlank()
-            return if (ok) out.lineSequence().firstOrNull()?.trim() else null
+            if (ok) out.lineSequence().firstOrNull()?.trim() else null
+        } catch (_: Throwable) {
+            null
         }
         val tools = TikzTools(
             dvisvgm = which("dvisvgm"),
@@ -209,7 +228,7 @@ object LatexHtml {
         return tools
     }
 
-    private fun run(cmd: List<String>, cwd: File, timeoutMs: Long = 60_000): Pair<Boolean,String> {
+    private fun run(cmd: List<String>, cwd: File, timeoutMs: Long = 60_000): Pair<Boolean, String> = try {
         val pb = ProcessBuilder(cmd).directory(cwd).redirectErrorStream(true)
 
         // >>> Add TEXINPUTS so pdflatex finds local *.tex/ TikZ libs in your project
@@ -225,9 +244,20 @@ object LatexHtml {
         val out = StringBuilder()
         val t = Thread { p.inputStream.bufferedReader().forEachLine { out.appendLine(it) } }
         t.start()
-        val ok = p.waitFor(timeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS)
-        if (!ok) { p.destroyForcibly(); return false to "Timeout running: $cmd\n$out" }
-        return (p.exitValue() == 0) to out.toString()
+        val finished = p.waitFor(timeoutMs, java.util.concurrent.TimeUnit.MILLISECONDS)
+        if (!finished) {
+            p.destroyForcibly()
+            false to "Timeout running: $cmd\n$out"
+        } else {
+            (p.exitValue() == 0) to out.toString()
+        }
+    } catch (e: IOException) {
+        false to (e.message ?: e.toString())
+    } catch (e: SecurityException) {
+        false to (e.message ?: e.toString())
+    } catch (e: Throwable) {
+        // Android may surface errno failures not typed as IOException; never crash the app.
+        false to (e.message ?: e.toString())
     }
 
     // convertLongtablesToTables → LatexHtmlBlocks.kt
@@ -250,53 +280,65 @@ object LatexHtml {
     /** Compile a queued lazy TikZ job by key into the cache. Returns the SVG File on success, null on failure. */
     @JvmStatic
     fun renderLazyTikzKeyToSvg(key: String): File? {
-        val texDoc = synchronized(lazyTikzJobs) { lazyTikzJobs[key] } ?: return null
+        return try {
+            if (isAndroidRuntime) return null
 
-        val cache = tikzCacheDir()
-        val svg = File(cache, "${sha1(texDoc)}.svg")
-        if (svg.exists()) return svg
+            val texDoc = synchronized(lazyTikzJobs) { lazyTikzJobs[key] } ?: return null
 
-        val work = File(cache, "job-$key").apply { mkdirs() }
-        val tex  = File(work, "fig.tex")
-        val pdf  = File(work, "fig.pdf")
-        tex.writeText(texDoc)
+            val cache = tikzCacheDir()
+            val svg = File(cache, "${sha1(texDoc)}.svg")
+            if (svg.exists()) return svg
 
-        // Ensure local TikZ libs are discoverable (same env var trick you already use)
-        // (Your run(...) adds TEXINPUTS from currentBaseDir — great.)
+            val work = File(cache, "job-$key").apply { mkdirs() }
+            val tex = File(work, "fig.tex")
+            val pdf = File(work, "fig.pdf")
+            tex.writeText(texDoc)
 
-        val (ok1, log1) = run(
-            listOf("pdflatex","-interaction=nonstopmode","-halt-on-error","fig.tex"),
-            work
-        )
-        if (!ok1 || !pdf.exists()) {
-            File(work,"build.log").writeText(log1)
-            return null
+            val (ok1, log1) = run(
+                listOf("pdflatex", "-interaction=nonstopmode", "-halt-on-error", "fig.tex"),
+                work
+            )
+            if (!ok1 || !pdf.exists()) {
+                File(work, "build.log").writeText(log1)
+                return null
+            }
+
+            val tools = findTikzTools()
+            val (ok2, log2) =
+                if (tools.dvisvgm != null)
+                    run(listOf(tools.dvisvgm!!, "--pdf", "--no-fonts", "--exact", "-n", "-o", "fig.svg", "fig.pdf"), work)
+                else if (tools.pdf2svg != null)
+                    run(listOf(tools.pdf2svg!!, "fig.pdf", "fig.svg"), work)
+                else false to "Neither dvisvgm nor pdf2svg is available."
+            if (!ok2) {
+                File(work, "convert.log").writeText(log2)
+                return null
+            }
+
+            val produced = File(work, "fig.svg")
+            if (produced.exists()) {
+                svg.writeText(produced.readText())
+                svg
+            } else {
+                null
+            }
+        } catch (_: Throwable) {
+            null
         }
-
-        val tools = findTikzTools()
-        val (ok2, log2) =
-            if (tools.dvisvgm != null)
-                run(listOf(tools.dvisvgm!!,"--pdf","--no-fonts","--exact","-n","-o","fig.svg","fig.pdf"), work)
-            else if (tools.pdf2svg != null)
-                run(listOf(tools.pdf2svg!!,"fig.pdf","fig.svg"), work)
-            else false to "Neither dvisvgm nor pdf2svg is available."
-        if (!ok2) {
-            File(work,"convert.log").writeText(log2)
-            return null
-        }
-
-        val produced = File(work,"fig.svg")
-        if (produced.exists()) {
-            svg.writeText(produced.readText()) // move into cache under stable name
-            return svg
-        }
-        return null
     }
 
 
+    /** Directory containing [mainFilePath], or a non-empty fallback — never `""` (breaks [TikzRenderer] / path joins). */
+    private fun directoryForMainTex(mainFilePath: String): String {
+        val f = File(mainFilePath)
+        f.parentFile?.absolutePath?.takeUnless { it.isEmpty() }?.let { return it }
+        f.absoluteFile.parentFile?.absolutePath?.takeUnless { it.isEmpty() }?.let { return it }
+        return File(".").absolutePath
+    }
+
     /** Recursively inline all \input{...} and \include{...} files. */
     fun inlineInputs(source: String, baseDir: String, seen: MutableSet<String> = mutableSetOf()): String {
-        val rx = Regex("""\\(input|include)\{([^\u007D]+)\}""")
+        val rx = Regex("""\\(input|include)\{(.+?)\}""", RegexOption.DOT_MATCHES_ALL)
 
         var result: String = source
 
@@ -312,7 +354,8 @@ object LatexHtml {
             if (absPath != null && absPath !in seen) {
                 seen += absPath
                 val fileText = filePath.readText()
-                val inlined = inlineInputs(fileText, filePath.parent ?: baseDir, seen)
+                val nextBase = filePath.parentFile?.absolutePath?.takeUnless { it.isEmpty() } ?: baseDir
+                val inlined = inlineInputs(fileText, nextBase, seen)
                 result = result.replace(m.value, inlined)
             } else if (absPath != null && absPath in seen) {
                 result = result.replace(m.value, "% Circular input: $rawPath %")
@@ -323,9 +366,15 @@ object LatexHtml {
         return result
     }
 
-    fun wrapWithInputs(texSource: String, mainFilePath: String): String {
-        val baseDir = File(mainFilePath).parent ?: ""
+    fun wrapWithInputs(
+        texSource: String,
+        mainFilePath: String,
+        tikzRenderButtonLabel: String = "Render TikZ",
+        tikzNoCompilerNote: String? = null,
+    ): String {
+        val baseDir = directoryForMainTex(mainFilePath)
         currentBaseDir = baseDir  // package-level in LatexHtmlState.kt
+        TikzRenderer.currentBaseDir = baseDir
 
         // Build marked source to compute orig→merged line mapping across \input/\include expansions
         val markerPrefix = "%%LLM"
@@ -372,7 +421,7 @@ object LatexHtml {
         lineMapOrigToMergedJson = o2m.joinToString(prefix = "[", postfix = "]") { it.toString() }
         lineMapMergedToOrigJson = m2o.joinToString(prefix = "[", postfix = "]") { it.toString() }
 
-        val html = wrap(fullSource)
+        val html = wrap(fullSource, tikzRenderButtonLabel, tikzNoCompilerNote)
         // keep baseDir for subsequent renders; do not clear to allow incremental refreshes
         return html
     }

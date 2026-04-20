@@ -2,4 +2,5 @@
 <paths>
     <cache-path name="pdf_export" path="." />
     <files-path name="export" path="." />
+    <files-path name="latex_images" path="latex_images" />
 </paths>

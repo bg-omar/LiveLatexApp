@@ -286,33 +286,49 @@ internal fun injectLineAnchors(s: String, absOffset: Int, everyN: Int = 3): Stri
 
 internal fun toFileUrl(f: File): String = f.toURI().toString()
 
+/** Relative path under [baseDir] when possible, else `file:` URL — matches WebView `loadDataWithBaseURL` file base. */
+private fun imgSrcPathForWebView(resolvedFile: File, baseDir: File): String {
+    if (baseDir.path.isEmpty() || !baseDir.isDirectory) return toFileUrl(resolvedFile)
+    return try {
+        val bc = baseDir.canonicalFile
+        val fc = resolvedFile.canonicalFile
+        val bp = bc.absolutePath.let { p -> if (p.endsWith(File.separator)) p else "$p${File.separator}" }
+        if (!fc.absolutePath.startsWith(bp)) return toFileUrl(resolvedFile)
+        fc.absolutePath.removePrefix(bp).replace(File.separatorChar, '/')
+    } catch (_: Exception) {
+        toFileUrl(resolvedFile)
+    }
+}
+
 internal fun resolveImagePath(path: String, baseDirFallback: String = "figures"): String {
     val p = path.trim()
     if (p.isEmpty()) return ""
     if (p.startsWith("http://") || p.startsWith("https://") || p.startsWith("data:")) return p
     val baseDir = currentBaseDir?.let { File(it) } ?: File("")
     val abs = File(p)
-    if (abs.isAbsolute && abs.exists()) return toFileUrl(abs)
-    val rel = File(baseDir, p)
-    val relFigures = File(baseDir, "figures${File.separator}$p")
-    val hasExt = p.contains('.')
-    val exts = listOf(".png", ".jpg", ".jpeg", ".svg", ".pdf")
-    fun existingWithExt(f: File): String? {
-        if (hasExt) return if (f.exists()) toFileUrl(f) else null
-        for (e in exts) {
-            val c = File(f.parentFile ?: baseDir, f.name + e)
-            if (c.exists()) return toFileUrl(c)
+    val chosen: File = when {
+        abs.isAbsolute && abs.exists() -> abs
+        else -> {
+            val rel = File(baseDir, p)
+            val relFigures = File(baseDir, "figures${File.separator}$p")
+            val hasExt = p.contains('.')
+            val exts = listOf(".png", ".jpg", ".jpeg", ".svg", ".pdf")
+            fun existingFile(f: File): File? {
+                if (hasExt) return if (f.exists()) f else null
+                for (e in exts) {
+                    val c = File(f.parentFile ?: baseDir, f.name + e)
+                    if (c.exists()) return c
+                }
+                return null
+            }
+            existingFile(rel) ?: existingFile(relFigures) ?: (if (hasExt) rel else File(rel.parentFile ?: baseDir, rel.name + exts.first()))
         }
-        return null
     }
-    existingWithExt(rel)?.let { return it }
-    existingWithExt(relFigures)?.let { return it }
-    val fallback = if (hasExt) rel else File(rel.parentFile ?: baseDir, rel.name + exts.first())
-    return toFileUrl(fallback)
+    return imgSrcPathForWebView(chosen, baseDir)
 }
 
 internal fun convertIncludeGraphics(latex: String): String {
-    val rx = Regex("""\\includegraphics(\[.*?\])?\{([^}]+)\}""")
+    val rx = Regex("""\\includegraphics(\[.*?\])?\{(.+?)\}""", RegexOption.DOT_MATCHES_ALL)
     return rx.replace(latex) { match ->
         val opts = match.groups[1]?.value ?: ""
         val path = match.groups[2]?.value ?: ""
