@@ -6,6 +6,46 @@ import kotlin.text.RegexOption
  * LaTeX sanitization for MathJax compatibility. Part of LatexHtml multi-file object.
  */
 
+/** Names kept as raw `\\begin{…}` / `\\end{…}` for MathJax (no regex — avoids Android/ICU pattern limits). */
+private val SANITIZER_KEEP_BEGIN_END_ENVS = setOf(
+    "equation", "equation*",
+    "align", "align*",
+    "aligned", "aligned*",
+    "gather", "gather*",
+    "multline", "multline*",
+    "flalign", "flalign*",
+    "alignat", "alignat*",
+    "bmatrix", "pmatrix", "vmatrix", "Bmatrix", "Vmatrix", "smallmatrix", "matrix", "cases", "split",
+    "tabular", "table", "longtable", "figure", "center", "tikzpicture", "tcolorbox",
+    "thebibliography", "itemize", "enumerate", "description", "multicols",
+)
+
+/** Strip `\\begin{name}` / `\\end{name}` when [name] is not in [keep]. */
+private fun stripDisallowedBeginEndEnvTags(text: String, keep: Set<String>): String {
+    var s = text
+    for (prefix in listOf("\\begin{", "\\end{")) {
+        var i = 0
+        while (i < s.length) {
+            val j = s.indexOf(prefix, i)
+            if (j < 0) break
+            val nameStart = j + prefix.length
+            val nameEnd = s.indexOf('}', nameStart)
+            if (nameEnd < 0) {
+                i = j + prefix.length
+                continue
+            }
+            val env = s.substring(nameStart, nameEnd)
+            if (env !in keep) {
+                s = s.substring(0, j) + s.substring(nameEnd + 1)
+                i = j
+            } else {
+                i = nameEnd + 1
+            }
+        }
+    }
+    return s
+}
+
 /** Convert abstract/center/theorem-like to HTML; drop unknown NON-math envs; keep math envs intact. */
 internal fun sanitizeForMathJaxProse(bodyText: String): String {
     var s = bodyText
@@ -13,11 +53,11 @@ internal fun sanitizeForMathJaxProse(bodyText: String): String {
         .replace("""\\titlepageClose""".toRegex(), "")
 
     s = s.replace(
-        Regex("""\\begin\{center\}(.+?)\\end\{center\}""", RegexOption.DOT_MATCHES_ALL)
+        rxBetween("\\begin{center}", "\\end{center}", """(.+?)""")
     ) { m -> """<div style="text-align:center;">${latexProseToHtmlWithMath(m.groupValues[1].trim())}</div>""" }
 
     s = s.replace(
-        Regex("""\\begin\{abstract\}(.+?)\\end\{abstract\}""", RegexOption.DOT_MATCHES_ALL)
+        rxBetween("\\begin{abstract}", "\\end{abstract}", """(.+?)""")
     ) { m ->
         val raw = m.groupValues[1].trim()
         val collapsedSingles = raw.replace(Regex("""(?<!\n)\n(?!\n)"""), " ")
@@ -38,7 +78,10 @@ internal fun sanitizeForMathJaxProse(bodyText: String): String {
     val theoremLike = listOf("theorem", "lemma", "proposition", "corollary", "definition", "remark", "identity")
     for (env in theoremLike) {
         s = s.replace(
-            Regex("""\\begin\{$env\}(?:\[(.*?)\])?(.+?)\\end\{$env\}""", RegexOption.DOT_MATCHES_ALL)
+            Regex(
+                latexLiteral("\\begin{$env}") + """(?:\[(.*?)\])?(.+?)""" + latexLiteral("\\end{$env}"),
+                RegexOption.DOT_MATCHES_ALL
+            )
         ) { m ->
             val ttl = m.groupValues[1].trim()
             val content = m.groupValues[2].trim()
@@ -50,20 +93,14 @@ internal fun sanitizeForMathJaxProse(bodyText: String): String {
         }
     }
 
-    val mathEnvs =
-        "(?:equation\\*?|align\\*?|aligned\\*?|aligned|gather\\*?|multline\\*?|flalign\\*?|alignat\\*?|bmatrix|pmatrix|vmatrix|Bmatrix|Vmatrix|smallmatrix|matrix|cases|split)"
-    val keepEnvs =
-        "(?:$mathEnvs|tabular|table|longtable|figure|center|tikzpicture|tcolorbox|thebibliography|itemize|enumerate|description|multicols)"
-
-    s = s.replace(Regex("""\\begin\{(?!$keepEnvs)\w+\}"""), "")
-    s = s.replace(Regex("""\\end\{(?!$keepEnvs)\w+\}"""), "")
+    s = stripDisallowedBeginEndEnvTags(s, SANITIZER_KEEP_BEGIN_END_ENVS)
 
     return s
 }
 
 internal fun convertSiunitx(s: String): String {
     var t = s
-    t = t.replace(Regex("""\\num\{([^\u007D]*)\}""")) { m ->
+    t = t.replace(Regex("""\\num\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)) { m ->
         val raw = m.groupValues[1].trim()
         val sci = Regex("""^\s*([+-]?\d+(?:\.\d+)?)[eE]([+-]?\d+)\s*$""").matchEntire(raw)
         if (sci != null) {
@@ -72,11 +109,11 @@ internal fun convertSiunitx(s: String): String {
             "$a\\times 10^{${b}}"
         } else raw
     }
-    t = t.replace(Regex("""\\si\{([^\u007D]*)\}""")) { m ->
+    t = t.replace(Regex("""\\si\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)) { m ->
         val u = m.groupValues[1].replace(".", "\\,").replace("~", "\\,")
         "\\mathrm{$u}"
     }
-    t = t.replace(Regex("""\\SI\{([^\u007D]*)\}\{([^\u007D]*)\}""")) { m ->
+    t = t.replace(Regex("""\\SI\{(.*?)\}\{(.*?)\}""", RegexOption.DOT_MATCHES_ALL)) { m ->
         val num  = m.groupValues[1]
         val unit = m.groupValues[2]
         "\\num{$num}\\,\\si{$unit}"

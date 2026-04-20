@@ -34,7 +34,7 @@ object GitHubOAuthHelper {
      */
     fun launchSignIn(context: Context, clientId: String, clientSecret: String?) {
         if (clientId.isBlank()) {
-            ErrorDialog.show(context, "Configure GitHub Client ID in BuildConfig or settings")
+            ErrorDialog.show(context, "Configure GitHub Client ID in gradle.properties (GITHUB_CLIENT_ID) or settings")
             return
         }
         val uri = Uri.parse(AUTH_URL).buildUpon()
@@ -56,7 +56,7 @@ object GitHubOAuthHelper {
 
         if (clientSecret.isNullOrBlank()) {
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Add GitHub Client Secret (e.g. in BuildConfig) to complete sign-in", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Add GitHub Client Secret (e.g. in gradle.properties as GITHUB_CLIENT_SECRET) to complete sign-in", Toast.LENGTH_LONG).show()
             }
             return false
         }

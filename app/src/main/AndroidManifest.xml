@@ -6,6 +6,7 @@
     <!-- Optional: for Google Drive / account picker -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <application
+        android:name=".LiveLatexApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -14,6 +15,9 @@
         android:roundIcon="@drawable/ic_launcher_foreground"
         android:supportsRtl="true"
         android:theme="@style/Theme.LiveLatexApp">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="@string/admob_app_id"/>
         <activity
             android:name="com.omariskandarani.livelatexapp.MainActivity"
             android:exported="true"

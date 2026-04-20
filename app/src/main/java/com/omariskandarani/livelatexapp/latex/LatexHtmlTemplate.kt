@@ -16,7 +16,7 @@ internal fun buildHtml(fullTextHtml: String, macrosJs: String, lineMapOrigToMerg
         content="default-src 'self' 'unsafe-inline' data: blob: https://cdn.jsdelivr.net;
                  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
                  style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
-                 img-src * data: blob:;
+                 img-src * data: blob: file:;
                  font-src https://cdn.jsdelivr.net data:;">
   <script>
     // Line maps injected from Kotlin (orig->merged, merged->orig)

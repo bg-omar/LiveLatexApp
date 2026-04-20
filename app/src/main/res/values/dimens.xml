@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Padding onder statusbalk voor stats-header (alleen on-screen, geen layout_gone) -->
+    <dimen name="document_stats_bar_padding_bottom">8dp</dimen>
+</resources>

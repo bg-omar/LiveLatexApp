@@ -1,0 +1,5 @@
+Play Console checklist (Community vs Pro release)
+- Create an in-app product with id matching IAP_PRO_PRODUCT_ID in gradle.properties (default: pro_upgrade).
+- Register the app in AdMob; set ADMOB_APP_ID and ADMOB_REWARDED_UNIT_ID in gradle.properties for release builds.
+- Replace PROMO_HMAC_SECRET with a long random secret; generate promo payloads offline with HMAC-SHA256 over the base64url payload, format: payload.signatureHex (see PromoCodeValidator).
+- Complete Google Play Data safety: Financial info (in-app purchases), Advertising ID if using ads; update the privacy policy to mention Billing and rewarded ads.

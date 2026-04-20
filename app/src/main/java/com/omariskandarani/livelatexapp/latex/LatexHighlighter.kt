@@ -30,7 +30,7 @@ object LatexHighlighter {
     private val MATH_INLINE = Pattern.compile("\\$")
 
     // \begin{env} and \end{env} – highlight env name (content of first {...} after \begin or \end)
-    private val BEGIN_END = Pattern.compile("\\\\(?:begin|end)\\s*\\{([^{}]*)\\}")
+    private val BEGIN_END = Pattern.compile("(?s)\\\\(?:begin|end)\\s*\\{(.*?)\\}")
 
     @JvmStatic
     fun applyHighlighting(editable: Editable?) {

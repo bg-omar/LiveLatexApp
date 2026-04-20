@@ -8,7 +8,7 @@ import org.json.JSONObject
 object RecentFilesPrefs {
     private const val PREF_NAME = "LiveLatexApp"
     private const val KEY_RECENT = "recent_files"
-    private const val MAX_RECENT = 10
+    private const val MAX_RECENT = 24
 
     data class Entry(val uri: String, val displayName: String, val lastOpenedAt: Long = 0L)
 

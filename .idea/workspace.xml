@@ -82,28 +82,61 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b8480210-f6c6-4ea1-83d6-93e0c3da24ad" name="Changes" comment="Implement LaTeX snippet insertion, preview error handling, and enhanced tab management&#10;&#10;- Add a new `LatexSnippets` utility to generate LaTeX code for lists, tables, figures, and TikZ diagrams&#10;- Implement an &quot;Insert&quot; menu with support for adding images (gallery/camera), tables, lists, and TikZ templates&#10;- Add a preview error banner that displays compilation errors and allows navigation to the specific error line in the editor&#10;- Enhance the preview toolbar with &quot;Refresh&quot; and &quot;Copy Text&quot; functionalities&#10;- Improve tab management with a &quot;More Tabs&quot; overflow sheet for when more than 5 documents are open&#10;- Update the recent files list to display the &quot;last opened&quot; timestamp&#10;- Add a &quot;Don't ask again&quot; preference for discarding unsaved changes when closing tabs&#10;- Update project configuration and UI styles, including new icons and layout improvements for dialogs and lists">
-      <change afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/TemplateDefaultsPrefs.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_braces.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_template_defaults.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/src/main/res/layout/flyin_menu.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/EditorPrefs.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/EditorPrefs.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LatexTemplates.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LatexTemplates.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LineNumberView.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/LineNumberView.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/RecentFilesPrefs.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/RecentFilesPrefs.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GitHubOAuthHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GitHubOAuthHelper.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GoogleDriveHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GoogleDriveHelper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHighlighter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHighlighter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtml.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtml.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlBlocks.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlBlocks.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlProse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlProse.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlSanitizer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlSanitizer.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlTemplate.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlTemplate.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/TikzRenderer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/omariskandarani/livelatexapp/latex/TikzRenderer.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_options.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/bottom_sheet_options.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_symbol_button.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_symbol_button.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/dialog_find_replace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/dialog_find_replace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/flyin_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/flyin_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/item_recent_file.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/item_recent_file.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/menu/menu_insert.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/menu/menu_insert.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/local.properties" beforeDir="false" afterPath="$PROJECT_DIR$/local.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/res/xml/file_paths.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/xml/file_paths.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/EditorPrefs.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/EditorPrefs.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/LatexTemplates.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/LatexTemplates.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/LineNumberView.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/LineNumberView.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/MainActivity.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/RecentFilesPrefs.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/RecentFilesPrefs.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GitHubOAuthHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/cloud/GitHubOAuthHelper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtml.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtml.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlBlocks.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlBlocks.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlProse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlProse.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlSanitizer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlSanitizer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlTemplate.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlTemplate.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/LatexHtmlUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/TikzRenderer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/java/com/omariskandarani/livelatexapp/latex/TikzRenderer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/bottom_sheet_options.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/bottom_sheet_options.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/dialog_find_replace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/dialog_find_replace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/flyin_menu.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/flyin_menu.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/item_recent_file.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/res/layout/item_recent_file.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/res/menu/menu_insert.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/res/menu/menu_insert.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rust_core/app/src/main/res/xml/file_paths.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rust_core/app/src/main/res/xml/file_paths.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -127,7 +160,7 @@
       <entry key="agent-panel" value="Auto" />
     </selectedModels>
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[PhysicalDevice::serial=R5CY83METKL]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[LocalEmulator::path=C:\Users\oscar\.android\avd\Pixel_9_Pro_Fold.avd, PhysicalDevice::serial=R5CY83METKL]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -237,45 +270,47 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Android App.app.executor": "Run",
-    "BundleExportedModule": "LiveLatexApp.app",
-    "ExportBundle.BundlePathForLiveLatexApp.app": "C:\\workspace\\projects\\LiveLatex\\LiveLatexApp\\app",
-    "Gradle.Configure Daemon JVM Criteria.executor": "Run",
-    "GradleDaemonJvmCriteriaMigrationNotification.isNotificationDisabled": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SONARLINT_PRECOMMIT_ANALYSIS": "false",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "com.google.services.firebase.aqiPopupShown": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/workspace/projects/LiveLatexApp/app/src/main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.17",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Android App.app.executor&quot;: &quot;Run&quot;,
+    &quot;BundleExportedModule&quot;: &quot;LiveLatexApp.app&quot;,
+    &quot;ExportBundle.BundlePathForLiveLatexApp.app&quot;: &quot;C:\\workspace\\projects\\LiveLatex\\LiveLatexApp\\app&quot;,
+    &quot;Gradle.Configure Daemon JVM Criteria.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LiveLatexApp [buildDependents].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.LiveLatexApp [clean].executor&quot;: &quot;Run&quot;,
+    &quot;GradleDaemonJvmCriteriaMigrationNotification.isNotificationDisabled&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/workspace/projects/LiveLatexApp/app/src/main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.17&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;AndroidSdkUpdater&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "ExportApk.BuildVariants": [
-      "release"
+  &quot;keyToStringList&quot;: {
+    &quot;ExportApk.BuildVariants&quot;: [
+      &quot;release&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\workspace\projects\LiveLatexApp\app\src\main" />
@@ -288,7 +323,7 @@
       <recent name="com.omariskandarani.livelatexapp" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Android App.app">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="LiveLatexApp.app" />
       <option name="ANDROID_RUN_CONFIGURATION_SCHEMA_VERSION" value="$GIT_TEST_DEBUG_UNSAFE_DIRECTORIES$" />
@@ -310,8 +345,6 @@
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
       <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
-      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-$GIT_TEST_DEBUG_UNSAFE_DIRECTORIES$" />
-      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
       <option name="DEBUGGER_TYPE" value="Java" />
       <Auto>
         <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
@@ -361,6 +394,132 @@
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="rust_core.app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+      <module name="LiveLatexApp.rust_core.app" />
+      <option name="ANDROID_RUN_CONFIGURATION_SCHEMA_VERSION" value="$GIT_TEST_DEBUG_UNSAFE_DIRECTORIES$" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="ALLOW_ASSUME_VERIFIED" value="false" />
+      <option name="CLEAR_APP_STORAGE" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="RESTORE_ENABLED" value="false" />
+      <option name="RESTORE_FILE" value="" />
+      <option name="RESTORE_FRESH_INSTALL_ONLY" value="false" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Hybrid>
+      <Java>
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Java>
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LiveLatexApp [buildDependents]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="buildDependents" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="LiveLatexApp [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="clean" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <ExternalSystemDebugDisabled>false</ExternalSystemDebugDisabled>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <GradleProfilingDisabled>false</GradleProfilingDisabled>
+      <GradleCoverageDisabled>false</GradleCoverageDisabled>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.LiveLatexApp [buildDependents]" />
+        <item itemvalue="Gradle.LiveLatexApp [clean]" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
