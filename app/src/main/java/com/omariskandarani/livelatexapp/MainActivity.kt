@@ -52,6 +52,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import com.google.android.material.R as MaterialR
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.omariskandarani.livelatexapp.R
 import com.omariskandarani.livelatexapp.cloud.CloudPrefs
 import com.omariskandarani.livelatexapp.cloud.GitHubOAuthHelper
@@ -635,7 +636,7 @@ class MainActivity : AppCompatActivity() {
     private fun tryLaunchProPurchase() {
         val pd = billingHelper.productDetails
         if (pd == null) {
-            Toast.makeText(this, R.string.pro_product_unavailable, Toast.LENGTH_LONG).show()
+            showErrorSnackbar(getString(R.string.pro_product_unavailable), "Retry") { tryLaunchProPurchase() }
             return
         }
         billingHelper.launchPurchaseFlow()
@@ -643,7 +644,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun tryShowRewardedForPro() {
         if (!RewardedProHelper.canWatchRewarded(entitlement)) {
-            Toast.makeText(this, R.string.pro_rewarded_cooldown, Toast.LENGTH_LONG).show()
+            showErrorSnackbar(getString(R.string.pro_rewarded_cooldown), "Details") { showProUpsellDialog() }
             return
         }
         val unitId = getString(R.string.admob_rewarded_unit_id)
@@ -657,7 +658,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.promo_ok, Toast.LENGTH_SHORT).show()
             },
             onFailure = { msg ->
-                Toast.makeText(this, getString(R.string.pro_ad_failed, msg ?: "?"), Toast.LENGTH_LONG).show()
+                showErrorSnackbar(getString(R.string.pro_ad_failed, msg ?: "?"), "Retry") { tryShowRewardedForPro() }
             }
         )
     }
@@ -672,8 +673,8 @@ class MainActivity : AppCompatActivity() {
             .setPositiveButton(R.string.promo_redeem) { d, _ ->
                 val code = input.text?.toString().orEmpty()
                 when (val r = PromoCodeValidator.tryRedeem(code, BuildConfig.PROMO_HMAC_SECRET)) {
-                    is PromoRedeemResult.Invalid -> Toast.makeText(this, R.string.promo_invalid, Toast.LENGTH_LONG).show()
-                    is PromoRedeemResult.Expired -> Toast.makeText(this, R.string.promo_expired, Toast.LENGTH_LONG).show()
+                    is PromoRedeemResult.Invalid -> showErrorSnackbar(getString(R.string.promo_invalid), "Edit") { showPromoCodeDialog() }
+                    is PromoRedeemResult.Expired -> showErrorSnackbar(getString(R.string.promo_expired), "Edit") { showPromoCodeDialog() }
                     is PromoRedeemResult.Lifetime -> {
                         entitlement.setPurchasedPro(true)
                         Toast.makeText(this, R.string.promo_ok, Toast.LENGTH_LONG).show()
@@ -990,7 +991,7 @@ class MainActivity : AppCompatActivity() {
             val desc = editDesc.text?.toString()?.trim() ?: ""
             val body = editBody.text?.toString() ?: ""
             if (name.isEmpty()) {
-                Toast.makeText(this, getString(R.string.template_name_required), Toast.LENGTH_SHORT).show()
+                showErrorSnackbar(getString(R.string.template_name_required), "Fix") { editName.requestFocus() }
                 return@setOnClickListener
             }
             if (isNew) {
@@ -1138,7 +1139,7 @@ class MainActivity : AppCompatActivity() {
         btnFindNavPrevious.setOnClickListener {
             if (activeFindQuery.isEmpty()) return@setOnClickListener
             if (!editorFindNext(activeFindQuery, false)) {
-                Toast.makeText(this, getString(R.string.find) + ": no match", Toast.LENGTH_SHORT).show()
+                showErrorSnackbar(getString(R.string.find) + ": no match", "Find") { showFindReplaceDialog() }
             }
             refreshFindNavigationBar()
             scrollEditorToCaret()
@@ -1146,7 +1147,7 @@ class MainActivity : AppCompatActivity() {
         btnFindNavNext.setOnClickListener {
             if (activeFindQuery.isEmpty()) return@setOnClickListener
             if (!editorFindNext(activeFindQuery, true)) {
-                Toast.makeText(this, getString(R.string.find) + ": no match", Toast.LENGTH_SHORT).show()
+                showErrorSnackbar(getString(R.string.find) + ": no match", "Find") { showFindReplaceDialog() }
             }
             refreshFindNavigationBar()
             scrollEditorToCaret()
@@ -1176,7 +1177,7 @@ class MainActivity : AppCompatActivity() {
         editText.clearFocus()
         if (findStr.isNotEmpty()) {
             if (!editorFindNext(findStr, forward)) {
-                Toast.makeText(this, getString(R.string.find) + ": no match", Toast.LENGTH_SHORT).show()
+                showErrorSnackbar(getString(R.string.find) + ": no match", "Find") { showFindReplaceDialog() }
             }
         }
         refreshFindNavigationBar()
@@ -1258,7 +1259,7 @@ class MainActivity : AppCompatActivity() {
                     updateMatchCount()
                 }
             } else {
-                if (!findNextInDialog(true)) Toast.makeText(this, getString(R.string.find) + ": no match", Toast.LENGTH_SHORT).show()
+                if (!findNextInDialog(true)) showErrorSnackbar(getString(R.string.find) + ": no match", "Find") { showFindReplaceDialog() }
                 else updateMatchCount()
             }
         }
@@ -2016,7 +2017,9 @@ class MainActivity : AppCompatActivity() {
             insertAtCursor(latex)
             setPreviewBaseDirForImages(imagesDir.absolutePath)
         } catch (e: Exception) {
-            ErrorDialog.show(this, "Insert image: ${e.message ?: "Unknown error"}")
+            showErrorSnackbar("Insert image failed: ${e.message ?: "Unknown error"}", "Pick Again") {
+                pickImageFromGallery.launch("image/*")
+            }
         }
     }
 
@@ -2033,7 +2036,7 @@ class MainActivity : AppCompatActivity() {
     private fun showTemplatesDialog(onDismiss: (() -> Unit)? = null) {
         val templates = filteredTemplatesForTier()
         if (templates.isEmpty()) {
-            Toast.makeText(this, getString(R.string.template_empty_list), Toast.LENGTH_LONG).show()
+            showErrorSnackbar(getString(R.string.template_empty_list), "Manage") { showManageTemplatesDialog() }
             onDismiss?.invoke()
             return
         }
@@ -2042,7 +2045,13 @@ class MainActivity : AppCompatActivity() {
         val dialog = MaterialAlertDialogBuilder(this)
             .setView(view)
             .create()
-        if (onDismiss != null) dialog.setOnDismissListener { onDismiss() }
+        // Keep drawer closed while template picker is active to avoid returning to fly-in menu.
+        drawerLayout.closeDrawer(drawerMenu)
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, drawerMenu)
+        dialog.setOnDismissListener {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, drawerMenu)
+            onDismiss?.invoke()
+        }
 
         val templatesList = view.findViewById<LinearLayout>(R.id.templates_list)
         val btnCancel = view.findViewById<Button>(R.id.btnCancel)
@@ -2058,6 +2067,7 @@ class MainActivity : AppCompatActivity() {
             templateDescription.text = template.description
 
             itemView.setOnClickListener {
+                drawerLayout.closeDrawer(drawerMenu)
                 dialog.dismiss()
                 createDocumentFromTemplate(template)
             }
@@ -2085,9 +2095,11 @@ class MainActivity : AppCompatActivity() {
         )
         documents.add(newDoc)
         currentDocIndex = documents.size - 1
+        setPreviewVisible(false)
+        drawerLayout.closeDrawer(drawerMenu)
         loadCurrentDocIntoEditor()
         refreshDocumentTabs()
-        drawerLayout.openDrawer(drawerMenu)
+        focusEditorAfterDocumentChange()
         Toast.makeText(this, "Created from ${template.name}", Toast.LENGTH_SHORT).show()
     }
 
@@ -2095,11 +2107,15 @@ class MainActivity : AppCompatActivity() {
         val uri = try {
             Uri.parse(uriString)
         } catch (_: Exception) {
-            ErrorDialog.show(this, getString(R.string.open_file) + ": invalid URI")
+            showErrorSnackbar(getString(R.string.open_file) + ": invalid URI", "Open") {
+                openDocument.launch(arrayOf("text/plain", "application/x-tex", "*/*"))
+            }
             return
         }
         if (!loadUriIntoNewDocumentOrFalse(uri)) {
-            ErrorDialog.show(this, getString(R.string.open_file) + ": failed")
+            showErrorSnackbar(getString(R.string.open_file) + ": failed", "Open") {
+                openDocument.launch(arrayOf("text/plain", "application/x-tex", "*/*"))
+            }
         }
     }
 
@@ -2129,6 +2145,7 @@ class MainActivity : AppCompatActivity() {
                 setPreviewVisible(true)
                 loadCurrentDocIntoEditor()
                 refreshDocumentTabs()
+                focusEditorAfterDocumentChange()
                 true
             } ?: false
         } catch (_: Exception) {
@@ -2206,6 +2223,28 @@ class MainActivity : AppCompatActivity() {
         updateDocumentStats()
         updateCurrentTabLabel()
         updatePreviewFromLatex(doc.content)
+    }
+
+    /** Keep typing flow in the editor after creating/opening a document from menus/dialogs. */
+    private fun focusEditorAfterDocumentChange() {
+        if (showPreview) return
+        editText.post {
+            editText.requestFocus()
+            scrollEditorToCaret()
+        }
+    }
+
+    private fun showErrorSnackbar(
+        message: CharSequence,
+        actionLabel: CharSequence? = null,
+        action: (() -> Unit)? = null
+    ) {
+        val root = findViewById<View>(android.R.id.content)
+        val snack = Snackbar.make(root, message, Snackbar.LENGTH_LONG)
+        if (actionLabel != null && action != null) {
+            snack.setAction(actionLabel) { action() }
+        }
+        snack.show()
     }
 
     private fun pushUndoState(state: String) {
@@ -2522,8 +2561,11 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             runOnUiThread {
-                drawerLayout.openDrawer(drawerMenu)
-                ErrorDialog.show(this, e.message ?: "Save failed")
+                showErrorSnackbar(e.message ?: "Save failed", "Save As") {
+                    pendingSaveThenCloseIndex = null
+                    pendingSaveContent = editText.text.toString()
+                    createDocument.launch("document.tex")
+                }
             }
         }
     }
@@ -2557,7 +2599,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun openUri(uri: Uri) {
         if (!loadUriIntoNewDocumentOrFalse(uri)) {
-            ErrorDialog.show(this, getString(R.string.open_file) + ": failed")
+            showErrorSnackbar(getString(R.string.open_file) + ": failed", "Open") {
+                openDocument.launch(arrayOf("text/plain", "application/x-tex", "*/*"))
+            }
         }
     }
 
@@ -2780,7 +2824,7 @@ class MainActivity : AppCompatActivity() {
                 if (svg != null) {
                     updatePreviewFromLatex(editText.text?.toString() ?: "")
                 } else {
-                    Toast.makeText(this@MainActivity, R.string.tikz_render_failed, Toast.LENGTH_LONG).show()
+                    showErrorSnackbar(getString(R.string.tikz_render_failed), "Retry") { renderTikzFromPreview(key) }
                 }
             }
         }
