@@ -1,7 +1,5 @@
 package com.omariskandarani.livelatexapp.latex
 
-import android.content.Context
-import com.omariskandarani.livelatexapp.latex.engine.LatexEngineFacade
 import java.io.File
 import java.io.IOException
 import java.nio.file.Paths
@@ -208,7 +206,7 @@ object LatexHtml {
     }
 
     // Try to find tools once and cache the result
-    private data class TikzTools(val pdflatex: String?, val dvisvgm: String?, val pdf2svg: String?)
+    private data class TikzTools(val dvisvgm: String?, val pdf2svg: String?)
     private var _tikzTools: TikzTools? = null
     private fun findTikzTools(): TikzTools {
         _tikzTools?.let { return it }
@@ -223,7 +221,6 @@ object LatexHtml {
             null
         }
         val tools = TikzTools(
-            pdflatex = which("pdflatex"),
             dvisvgm = which("dvisvgm"),
             pdf2svg = which("pdf2svg")
         )
@@ -282,14 +279,10 @@ object LatexHtml {
 
     /** Compile a queued lazy TikZ job by key into the cache. Returns the SVG File on success, null on failure. */
     @JvmStatic
-    fun renderLazyTikzKeyToSvg(key: String): File? = renderLazyTikzKeyToSvg(null, key)
-
-    /**
-     * @param hostContext Activity or application context on Android — required for the offline [LatexEngineFacade] path.
-     */
-    @JvmStatic
-    fun renderLazyTikzKeyToSvg(hostContext: Context?, key: String): File? {
+    fun renderLazyTikzKeyToSvg(key: String): File? {
         return try {
+            if (isAndroidRuntime) return null
+
             val texDoc = synchronized(lazyTikzJobs) { lazyTikzJobs[key] } ?: return null
 
             val cache = tikzCacheDir()
@@ -298,19 +291,11 @@ object LatexHtml {
 
             val work = File(cache, "job-$key").apply { mkdirs() }
             val tex = File(work, "fig.tex")
+            val pdf = File(work, "fig.pdf")
             tex.writeText(texDoc)
 
-            if (isAndroidRuntime) {
-                if (hostContext == null) return null
-                return LatexEngineFacade.compileStandaloneTikzToSvg(hostContext, texDoc, work, svg)
-            }
-
-            val pdf = File(work, "fig.pdf")
-            val tools = findTikzTools()
-            if (tools.pdflatex == null) return null
-
             val (ok1, log1) = run(
-                listOf(tools.pdflatex, "-interaction=nonstopmode", "-halt-on-error", "fig.tex"),
+                listOf("pdflatex", "-interaction=nonstopmode", "-halt-on-error", "fig.tex"),
                 work
             )
             if (!ok1 || !pdf.exists()) {
@@ -318,6 +303,7 @@ object LatexHtml {
                 return null
             }
 
+            val tools = findTikzTools()
             val (ok2, log2) =
                 if (tools.dvisvgm != null)
                     run(listOf(tools.dvisvgm!!, "--pdf", "--no-fonts", "--exact", "-n", "-o", "fig.svg", "fig.pdf"), work)

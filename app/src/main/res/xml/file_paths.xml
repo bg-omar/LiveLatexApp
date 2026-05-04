@@ -2,6 +2,5 @@
 <paths>
     <cache-path name="pdf_export" path="." />
     <files-path name="export" path="." />
-    <!-- getDir("latex_images") → files/latex_images/; camera output lives under .../latex_images/images/ -->
     <files-path name="latex_images" path="latex_images" />
 </paths>

@@ -105,7 +105,6 @@ object TikzRenderer {
             }
             renderButtonLabel.isNotBlank() -> {
                 val labelEsc = htmlEscapeAll(renderButtonLabel)
-                // key is hex [a-f0-9]{40} — safe inside single-quoted JS string
                 """<button type="button" class="ll-render-tikz" style="font:inherit;padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--fg);cursor:pointer;" onclick="if(window.TikzAndroid){TikzAndroid.render('$key');}">$labelEsc</button>"""
             }
             else -> ""

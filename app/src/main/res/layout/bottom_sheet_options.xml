@@ -119,39 +119,6 @@
             android:textSize="14sp"
             app:buttonTint="?attr/colorPrimary"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/section_latex_engine"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:textColor="?attr/colorPrimary"/>
-
-        <Spinner
-            android:id="@+id/spinnerLatexEngine"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/latex_engine_status_label"
-            android:textSize="11sp"
-            android:textColor="?attr/colorOnSurfaceVariant"/>
-
-        <TextView
-            android:id="@+id/textLatexEngineStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="?attr/colorOnSurface"
-            android:typeface="monospace"/>
-
         <!-- Editor -->
         <TextView
             android:layout_width="match_parent"

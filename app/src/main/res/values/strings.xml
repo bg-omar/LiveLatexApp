@@ -75,7 +75,6 @@
     <string name="insert_image">Insert image</string>
     <string name="insert_tikz">Insert TikZ</string>
     <string name="render_tikz">Render TikZ</string>
-    <!-- Full pdflatex/dvisvgm are not shipped in the Android app; TikZ is shown as source + note in preview. -->
     <string name="tikz_preview_no_compiler_note">TikZ is not compiled on this device (no LaTeX engine in the app). Math and text preview still work. To see TikZ figures, export your document and compile with LaTeX on a computer, or use the LiveLatex plugin in IntelliJ / Android Studio on the desktop.</string>
     <string name="tikz_render_failed">Could not refresh TikZ preview.</string>
     <string name="insert_table">Insert table</string>
@@ -196,11 +195,4 @@
     <string name="punctuation_insert_hint">Text to insert</string>
     <string name="punctuation_add">Add</string>
     <string name="debug_pro_toggle">Debug: treat as Pro</string>
-    <string name="section_latex_engine">Offline LaTeX</string>
-    <string name="latex_engine_status_label">Engine status</string>
-
-    <string-array name="latex_engine_entries">
-        <item>Tectonic (recommended)</item>
-        <item>TeX Live (stub)</item>
-    </string-array>
 </resources>
